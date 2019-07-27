@@ -17,6 +17,9 @@ let db = new sqlite3.Database('./data.db', sqlite3.OPEN_READWRITE, (err) => {
   if (err) return console.error(err.message);
   console.log('Connected to the in-memory SQlite database.');
   db.run('CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, ean CHAR(20), descricao CHAR(230), pco_venda CHAR(10), unidade CHAR(10), estoque CHAR(5))');
+  //Create vendas table
+  db.run('CREATE TABLE IF NOT EXISTS vendas (id INTEGER PRIMARY KEY AUTOINCREMENT, vendaID INTEGER, vendaItem INTEGER, ean CHAR(10), descricao CHAR(200), unidade CHAR(10), pco_venda CHAR(10), qnt INTEGER, subtotal INTEGER)');
+
 });
 
 
@@ -66,6 +69,24 @@ app.use(cors())
 
 
 // console.log('produtos:', produtos.data.items[0]);
+
+app.post('/vendaClose', function (req, res) {
+  json_data = JSON.parse(req.body.json_data)
+
+
+  //Insert itens
+  for (var i = 0; i < json_data.length; i++) {
+    db.run('INSERT INTO vendas (vendaID, vendaItem, ean, descricao, pco_venda, unidade, qnt, subtotal) VALUES (?,?,?,?,?,?,?,?)', [json_data[i].vendaID, json_data[i].vendaItem, json_data[i].ean, json_data[i].descricao, json_data[i].pco_venda, json_data[i].unidade, json_data[i].qnt, json_data[i].subtotal], function(err) {
+        if (err) {
+          return console.log(err.message);
+        }
+        // get the last insert id
+        console.log(`insert venda table success`);
+    });
+   }
+
+  res.send(req.body.json_data);
+});
 
 app.get('/', function (req, res) {
   res.send('Hello World!');

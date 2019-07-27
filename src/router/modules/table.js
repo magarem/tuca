@@ -31,6 +31,12 @@ const tableRouter = {
     //   meta: { title: 'Inline Edit' }
     // },
     {
+      path: 'pdv',
+      component: () => import('@/views/table/pdv'),
+      name: 'PDV',
+      meta: { title: 'PDV' }
+    },
+    {
       path: 'complex-table',
       component: () => import('@/views/table/complex-table'),
       name: 'ComplexTable',
