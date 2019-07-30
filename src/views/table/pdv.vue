@@ -2,55 +2,33 @@
   <div class="app-container">
   <el-input v-model="vendaID" placeholder="ID" style="width: 150px;" class="filter-item" @keyup.enter.native="handleFilter" />
     <div class="filter-container">
-      <el-input v-model="listQuery.qnt" placeholder="Qnt" style="width: 50px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.ean" placeholder="EAN" style="width: 200px;" class="filter-item" @keyup.enter.native="addList()" />
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="addList()">
+      <el-input v-model="qnt" placeholder="Qnt" style="width: 50px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.ean" placeholder="EAN" style="width: 200px;" class="filter-item" @keyup.enter.native="addList(listQuery.ean)" />
+      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="addList(listQuery.ean)">
         add
       </el-button>
-      <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @click="produtosListVisible = true"  />
-      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
-      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="produtosListVisible = true">
+      <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="getList(); produtosListFlg = true"  />
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="getList(); produtosListFlg = true">
         Procurar
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+      <!--el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate(null)">
         Incluir
-      </el-button>
-
-
+      </el-button-->
     </div>
-
     <el-table
       :key="tableKey"
-      v-loading="listLoading"
+      v-loading="false"
       :data="list"
       border
       fit
       highlight-current-row
       style="width: 100%;"
-      @sort-change="sortChange"
-    >
-      <el-table-column label="venda" prop="vendaID" sortable="custom" align="center" width="80">
+      @sort-change="sortChange">
+      <!--el-table-column label="venda" prop="vendaID" sortable="custom" align="center" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.vendaID }}</span>
         </template>
-      </el-table-column>
+      </el-table-column-->
       <el-table-column label="item" prop="vendaItem" sortable="custom" align="center" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.vendaItem }}</span>
@@ -80,17 +58,16 @@
           <span>{{ scope.row.qnt }}</span>
         </template>
       </el-table-column>
+
       <el-table-column label="subtotal" prop="subtotal" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.subtotal }}</span>
         </template>
       </el-table-column>
 
-
-
       <el-table-column label="Ações" align="center" width="100" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button size="mini" type="danger" @click="handleDelete(row)">
             X
           </el-button>
         </template>
@@ -99,7 +76,7 @@
 
     <br>
     <el-row :gutter="20">
-      <el-col :span="12"><div class="grid-content bg-purple">Total da compra: {{ totalGeral }}</div></el-col>
+      <el-col :span="12"><div class="grid-content bg-purple">Total da compra: R$ {{ totalGeral }}</div></el-col>
       <el-col :span="12">
         <div class="grid-content bg-purple">
         <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="vendaClose()">
@@ -152,6 +129,7 @@
         </el-button>
       </div>
     </el-dialog>
+
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="produtosListVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="EAN" prop="ean">
@@ -195,24 +173,93 @@
       </div>
     </el-dialog>
 
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
+    <el-dialog :visible.sync="produtosListFlg" title="Busca de produto" width="70%">
+      <el-table :data="produtosList" border fit highlight-current-row style="width: 100%">
+
+        <!--el-table-column label="ean" prop="ean" sortable="custom" align="center" width="80">
+          <template slot-scope="scope">
+            <span>{{ scope.row.ean }}</span>
+          </template>
+        </el-table-column-->
+
+        <el-table-column label="Descricao" prop="descricao" sortable="custom" align="center" width="350">
+          <template slot-scope="scope">
+            <span>{{ scope.row.descricao }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="unidade" prop="unidade" sortable="custom" align="center" width="100">
+          <template slot-scope="scope">
+            <span>{{ scope.row.unidade }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Preço" prop="pco_venda" sortable="custom" align="center" width="130">
+          <template slot-scope="scope">
+            <span>{{ scope.row.pco_venda }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Ações" align="center" width="100" class-name="small-padding fixed-width">
+          <template slot-scope="{row}">
+            <el-button size="mini" type="success" @click="tt(row.ean)">
+              Incluir
+            </el-button>
+          </template>
+        </el-table-column>
+
       </el-table>
+
+
+
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
+        <el-button type="primary" @click="produtosListFlg = false">Fechar</el-button>
       </span>
     </el-dialog>
 
-    <el-dialog :visible.sync="vendaCloseFlg" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
-      </span>
+    <el-dialog :visible.sync="vendaCloseFlg" title="Fechamento de venda" width="60%" >
+      <el-form ref="form" :model="form" label-width="170px">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-row>
+              <el-col :span="24"><div class="grid-content bg-purple-dark">Venda</div></el-col>
+            </el-row>
+            <el-form-item label="Total">
+              <el-input v-model="totalGeral"></el-input>
+            </el-form-item>
+            <el-form-item label="Desconto">
+              <el-input v-model="desconto"></el-input>
+            </el-form-item>
+            <el-form-item label="Acréscimo">
+              <el-input v-model="acrescimo"></el-input>
+            </el-form-item>
+            <el-form-item label="Total a pagar">
+              {{total_a_pagar}}
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-row>
+              <el-col :span="24"><div class="grid-content bg-purple-dark">Pagamento</div></el-col>
+            </el-row>
+            <el-form-item label="Dinheiro">
+              <el-input v-model="pago_dinheiro"></el-input>
+            </el-form-item>
+            <el-form-item label="Cartão de débito">
+              <el-input v-model="pago_debito"></el-input>
+            </el-form-item>
+            <el-form-item label="Cartão de crédito">
+              <el-input v-model="pago_credito"></el-input>
+            </el-form-item>
+            <el-form-item label="Valor pago">
+              <el-input v-model="valor_pago"></el-input>
+            </el-form-item>
+            <el-form-item label="Troco">
+              <el-input v-model="pago_troco"></el-input>
+            </el-form-item>
+          </el-col>
+         </el-row>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="dialogPvVisible = false">Confirma</el-button>
+        </span>
     </el-dialog>
   </div>
 </template>
@@ -256,17 +303,28 @@ export default {
   },
   data() {
     return {
+      form:{},
+      valor_pago: 0,
+      pago_troco: 0,
+      pago_dinheiro: 0,
+      pago_debito: 0,
+      pago_credito: 0,
+      total_a_pagar: 0,
+      desconto: 0,
+      acrescimo: 0,
       vendaID: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
       vendaItem: 0,
+      produtosListFlg: false,
       vendaCloseFlg: false,
-      produtosListVisible:false,
+      produtosListVisible: false,
       tableKey: 0,
       list: [],
+      produtosList: [],
       total: 0,
       totalGeral: 0,
       listLoading: true,
+      qnt:1,
       listQuery: {
-        qnt:1,
         page: 1,
         limit: 20,
         importance: undefined,
@@ -292,7 +350,7 @@ export default {
       dialogStatus: '',
       textMap: {
         update: 'Edit',
-        create: 'Create'
+        create: 'Incluir novo produto'
       },
       dialogPvVisible: false,
       pvData: [],
@@ -305,51 +363,60 @@ export default {
     }
   },
   created() {
-    this.getList()
+    // this.getList()
+
   },
   methods: {
+    tt(ean){
+      this.listQuery.ean = ean
+      this.addList(ean)
+    },
     vendaClose(){
       let json=JSON.stringify(this.list);
       let post_data={json_data:json}
-      axios.post('http://localhost:3000/vendaClose',post_data)
+      axios.post('http://localhost:3000/vendaClose', post_data)
+      this.total_a_pagar = this.totalGeral
+      this.vendaCloseFlg = true
     },
-    addList() {
-
+    addList(ean) {
       // this.list = [{descricao: "boneca", ean: "454545", estoque: "100", id: 4257, pco_venda: "232", unidade: "un"}]
       this.listLoading = true
       // this.total = 1
-      fetchList(this.listQuery).then(response => {
-        console.log('response.data.items:', response.data.items)
+      fetchList({ean: this.listQuery.ean}).then(response => {
+        console.log('response.data.items.length:', response.data.items.length)
+        if (response.data.items.length > 0){
 
-          this.list.push({vendaID: this.vendaID, vendaItem: this.vendaItem++, descricao: response.data.items[0].descricao, pco_venda: response.data.items[0].pco_venda, unidade: response.data.items[0].unidade, qnt: this.listQuery.qnt, subtotal: (parseInt(this.listQuery.qnt) * parseInt(response.data.items[0].pco_venda))})
-        this.total = response.data.total
+          // Caso encontre o código de barra no banco
+          this.list.push({vendaID: this.vendaID, vendaItem: this.vendaItem++, descricao: response.data.items[0].descricao, pco_venda: response.data.items[0].pco_venda, unidade: response.data.items[0].unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_venda))})
+          this.total = response.data.total
 
-        this.totalGeral += (parseInt(this.listQuery.qnt) * parseInt(response.data.items[0].pco_venda))
-        //this.list.push({descricao: "boneca2", ean: "454545", estoque: "100", id: 4257, pco_venda: "232", unidade: "un"})
-        //
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
+          this.totalGeral += (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_venda))
+          //this.list.push({descricao: "boneca2", ean: "454545", estoque: "100", id: 4257, pco_venda: "232", unidade: "un"})
+          //
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
+        }else{
+          // Caso não encontre o código de barra no banco pula para Incluir
+          this.handleCreate(this.listQuery.ean)
+        }
       })
 
       // this.list.push({descricao: "boneca2", ean: "454545", estoque: "100", id: 4257, pco_venda: "232", unidade: "un"})
       // console.log(this.list);
     },
     getList() {
-      // this.list = [{descricao: "boneca", ean: "454545", estoque: "100", id: 4257, pco_venda: "232", unidade: "un"}]
       this.listLoading = true
-      this.total = 0
-      // fetchList(this.listQuery).then(response => {
-      //   console.log('response.data.items:', response.data.items)
-      //   this.list = response.data.items
-      //   this.total = response.data.total
-      //
+      fetchList({descricao: this.listQuery.descricao}).then(response => {
+        console.log('response.data.items:', response.data.items)
+        this.produtosList = response.data.items
+        this.total2 = response.data.total
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
-      // })
+      })
     },
     handleFilter() {
       this.listQuery.page = 1
@@ -387,8 +454,14 @@ export default {
         type: ''
       }
     },
-    handleCreate() {
+    handleCreate(ean) {
       this.resetTemp()
+      //alert(ean)
+      if (ean!=null) this.temp.ean = ean
+      //this.qnt = 10
+      this.temp.qnt = this.qnt
+      this.temp.unidade = 'uni'
+      this.temp.estoque = 10
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -398,14 +471,18 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
           createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp)
+            //this.list.unshift(this.temp)
+            // Caso encontre o código de barra no banco
+            this.list.push({vendaID: this.vendaID, vendaItem: this.vendaItem++, descricao: this.temp.descricao, pco_venda: this.temp.pco_venda, unidade: this.temp.unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))})
+            this.total = this.list.length
+
+            this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))
+
             this.dialogFormVisible = false
             this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
+              title: 'Sucesso',
+              message: 'Produto cadastrado com sucesso',
               type: 'success',
               duration: 2000
             })
@@ -448,13 +525,16 @@ export default {
     },
     handleDelete(row) {
       this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
+        title: 'Sucesso',
+        message: 'Registro excluido',
         type: 'success',
         duration: 2000
       })
+      console.log(row);
+      this.totalGeral -= row.subtotal
       const index = this.list.indexOf(row)
       this.list.splice(index, 1)
+      // this.vendaItem--
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {
@@ -485,6 +565,45 @@ export default {
         }
       }))
     }
+  },
+  watch: {
+    // sempre que a pergunta mudar, essa função será executada
+    desconto: function () {
+      this.total_a_pagar = this.totalGeral - this.desconto + parseFloat(this.acrescimo)
+      this.valor_pago = (parseFloat(this.pago_dinheiro) + parseFloat(this.pago_debito) + parseFloat(this.pago_credito))
+      this.pago_troco = this.valor_pago - this.total_a_pagar
+      // this.answer = 'Esperando você parar de escrever...'
+      // this.debouncedGetAnswer()
+    },
+    acrescimo: function () {
+      this.total_a_pagar = this.totalGeral - this.desconto + parseFloat(this.acrescimo)
+      this.valor_pago = (parseFloat(this.pago_dinheiro) + parseFloat(this.pago_debito) + parseFloat(this.pago_credito))
+      this.pago_troco = this.valor_pago - this.total_a_pagar
+      // this.answer = 'Esperando você parar de escrever...'
+      // this.debouncedGetAnswer()
+    },
+    pago_dinheiro: function () {
+      this.total_a_pagar = this.totalGeral - this.desconto + parseFloat(this.acrescimo)
+      this.valor_pago = (parseFloat(this.pago_dinheiro) + parseFloat(this.pago_debito) + parseFloat(this.pago_credito))
+      this.pago_troco = this.valor_pago - this.total_a_pagar
+      // this.answer = 'Esperando você parar de escrever...'
+      // this.debouncedGetAnswer()
+    },
+    pago_debito: function () {
+      this.total_a_pagar = this.totalGeral - this.desconto + parseFloat(this.acrescimo)
+      this.valor_pago = (parseFloat(this.pago_dinheiro) + parseFloat(this.pago_debito) + parseFloat(this.pago_credito))
+      this.pago_troco = this.valor_pago - this.total_a_pagar
+      // this.answer = 'Esperando você parar de escrever...'
+      // this.debouncedGetAnswer()
+    },
+    pago_credito: function () {
+      this.total_a_pagar = this.totalGeral - this.desconto + parseFloat(this.acrescimo)
+      this.valor_pago = (parseFloat(this.pago_dinheiro) + parseFloat(this.pago_debito) + parseFloat(this.pago_credito))
+      this.pago_troco = this.valor_pago - this.total_a_pagar
+      // this.answer = 'Esperando você parar de escrever...'
+      // this.debouncedGetAnswer()
+    }
+
   }
 }
 </script>
