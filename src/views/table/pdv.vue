@@ -37,7 +37,7 @@
 
       <el-table-column label="Descricao" prop="descricao" sortable="custom" align="center" width="370">
         <template slot-scope="scope">
-          <span>{{ scope.row.descricao }}</span>
+          <span>{{ scope.row.descricao  | capitalize }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Unidade" prop="unidade" sortable="custom" align="center" width="120">
@@ -48,7 +48,7 @@
 
       <el-table-column label="Preço" prop="pco_venda" sortable="custom" align="center" width="90">
         <template slot-scope="scope">
-          <span>{{ scope.row.pco_venda }}</span>
+          <span>{{ scope.row.pco_venda | money }}</span>
         </template>
       </el-table-column>
 
@@ -61,7 +61,7 @@
 
       <el-table-column label="subtotal" prop="subtotal" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.subtotal }}</span>
+          <span>{{ scope.row.subtotal | money }}</span>
         </template>
       </el-table-column>
 
@@ -79,7 +79,7 @@
       <el-col :span="12"><div class="grid-content bg-purple">Total da compra: R$ {{ totalGeral }}</div></el-col>
       <el-col :span="12">
         <div class="grid-content bg-purple">
-        <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="vendaClose()">
+        <el-button v-show="totalGeral>0" v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="vendaClose()">
           Pagar
         </el-button>
         </div>
@@ -100,7 +100,8 @@
           <!--el-date-picker v-model="temp.descricao" type="datetime" placeholder="Please pick a date" /-->
         </el-form-item>
         <el-form-item label="Preço" prop="preco">
-          <el-input v-model="temp.pco_venda" />
+          <!--el-input v-model="temp.pco_venda" v-money="money"/-->
+          <money v-model="temp.pco_venda" v-bind="money" class="el-input__inner"></money>
         </el-form-item>
         <el-form-item label="Unidade" prop="unidade">
           <el-input v-model="temp.unidade" />
@@ -151,17 +152,6 @@
         <el-form-item label="Estoque" prop="estoque">
           <el-input v-model="temp.estoque" />
         </el-form-item>
-        <!--el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
-        </el-form-item-->
-        <!--el-form-item label="Imp">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
-        </el-form-item-->
-        <!--el-form-item label="Remark">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
-        </el-form-item-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -184,7 +174,7 @@
 
         <el-table-column label="Descricao" prop="descricao" sortable="custom" align="center" width="350">
           <template slot-scope="scope">
-            <span>{{ scope.row.descricao }}</span>
+            <span>{{ scope.row.descricao | capitalize}}</span>
           </template>
         </el-table-column>
         <el-table-column label="unidade" prop="unidade" sortable="custom" align="center" width="100">
@@ -194,7 +184,7 @@
         </el-table-column>
         <el-table-column label="Preço" prop="pco_venda" sortable="custom" align="center" width="130">
           <template slot-scope="scope">
-            <span>{{ scope.row.pco_venda }}</span>
+            <span>{{ scope.row.pco_venda | money}}</span>
           </template>
         </el-table-column>
 
@@ -215,6 +205,10 @@
       </span>
     </el-dialog>
 
+
+
+
+
     <el-dialog :visible.sync="vendaCloseFlg" title="Fechamento de venda" width="60%" >
       <el-form ref="form" :model="form" label-width="170px">
         <el-row :gutter="20">
@@ -223,16 +217,19 @@
               <el-col :span="24"><div class="grid-content bg-purple-dark">Venda</div></el-col>
             </el-row>
             <el-form-item label="Total">
-              <el-input v-model="totalGeral"></el-input>
+              <!--el-input v-model="totalGeral" v-money="money"></el-input-->
+              <money v-model="totalGeral" v-bind="money" class="el-input__inner"></money>
             </el-form-item>
             <el-form-item label="Desconto">
-              <el-input v-model="desconto"></el-input>
+              <!--el-input v-model="desconto" v-money="money"></el-input-->
+              <money v-model="desconto" v-bind="money" class="el-input__inner"></money>
             </el-form-item>
             <el-form-item label="Acréscimo">
-              <el-input v-model="acrescimo"></el-input>
+              <!--el-input v-model="acrescimo" v-money="money"></el-input-->
+              <money v-model="acrescimo" v-bind="money" class="el-input__inner"></money>
             </el-form-item>
             <el-form-item label="Total a pagar">
-              {{total_a_pagar}}
+              {{total_a_pagar | money}}
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -240,27 +237,48 @@
               <el-col :span="24"><div class="grid-content bg-purple-dark">Pagamento</div></el-col>
             </el-row>
             <el-form-item label="Dinheiro">
-              <el-input v-model="pago_dinheiro"></el-input>
+              <!--el-input v-model="pago_dinheiro"></el-input-->
+              <money v-model="pago_dinheiro" v-bind="money" class="el-input__inner"></money>
             </el-form-item>
             <el-form-item label="Cartão de débito">
-              <el-input v-model="pago_debito"></el-input>
+              <!--el-input v-model="pago_debito"></el-input-->
+              <money v-model="pago_debito" v-bind="money" class="el-input__inner"></money>
             </el-form-item>
             <el-form-item label="Cartão de crédito">
-              <el-input v-model="pago_credito"></el-input>
+              <!--el-input v-model="pago_credito"></el-input-->
+              <money v-model="pago_credito" v-bind="money" class="el-input__inner"></money>
             </el-form-item>
             <el-form-item label="Valor pago">
-              <el-input v-model="valor_pago"></el-input>
+              <!--el-input v-model="valor_pago"></el-input-->
+              <money v-model="valor_pago" v-bind="money" class="el-input__inner"></money>
             </el-form-item>
+
             <el-form-item label="Troco">
-              <el-input v-model="pago_troco"></el-input>
+              <!--el-input v-model="pago_troco"></el-input-->
+              <money v-if="pago_troco>0" v-model="pago_troco" v-bind="money" class="el-input__inner"></money>
             </el-form-item>
           </el-col>
          </el-row>
         </el-form>
         <span slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="dialogPvVisible = false">Confirma</el-button>
+          <el-button v-if="pago_troco>=0" type="primary" @click="vendaCloseOk(); dialogPvVisible = false">Confirma</el-button>
         </span>
     </el-dialog>
+
+
+    <el-dialog
+      title="Venda registrada"
+      :visible.sync="vendaCloseOkVisible"
+      width="30%"
+      >
+      <span>Venda registrada com sucesso!</span>
+      <span slot="footer" class="dialog-footer">
+        <!--el-button @click="dialogVisible = false">Cancel</el-button-->
+        <el-button type="primary" @click="vendaCloseOkVisible = false">Ok</el-button>
+      </span>
+    </el-dialog>
+
+
   </div>
 </template>
 
@@ -270,6 +288,7 @@ import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import axios from 'axios';
+import {Money} from 'v-money'
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -286,9 +305,22 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 
 export default {
   name: 'ComplexTable',
-  components: { Pagination },
-  directives: { waves },
+  components: { Pagination, Money },
+  directives: { waves},
   filters: {
+    money(value) {
+      if (!value) return ''
+      value = value.toString()
+      if (value.indexOf('.')==-1){
+        value += ",00"
+      }
+      return 'R$ ' + value.replace(".",",")
+    },
+    capitalize(value) {
+      if (!value) return ''
+      value = value.toString()
+      return value.charAt(0).toUpperCase() + value.slice(1)
+    },
     statusFilter(status) {
       const statusMap = {
         published: 'success',
@@ -303,6 +335,13 @@ export default {
   },
   data() {
     return {
+      money: {
+          decimal: ',',
+          thousands: '.',
+          prefix: 'R$ ',
+          precision: 2,
+          masked: false /* doesn't work with directive */
+        },
       form:{},
       valor_pago: 0,
       pago_troco: 0,
@@ -312,11 +351,13 @@ export default {
       total_a_pagar: 0,
       desconto: 0,
       acrescimo: 0,
+      pago_falta: 0,
       vendaID: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
       vendaItem: 0,
       produtosListFlg: false,
       vendaCloseFlg: false,
       produtosListVisible: false,
+      vendaCloseOkVisible: false,
       tableKey: 0,
       list: [],
       produtosList: [],
@@ -372,11 +413,42 @@ export default {
       this.addList(ean)
     },
     vendaClose(){
-      let json=JSON.stringify(this.list);
+
+      this.total_a_pagar = this.totalGeral
+
+      //clean up form
+      this.desconto = 0
+      this.acrescimo = 0
+      this.pago_dinheiro = 0
+      this.pago_credito = 0
+      this.pago_troco = 0 - this.total_a_pagar
+      this.vendaCloseFlg = true
+    },
+    vendaCloseOk(){
+      let a = {vendaID: this.vendaID, cliente: 0, subtotal: this.totalGeral, desconto: this.desconto, acrescimo: this.acrescimo, total: this.total, dinheiro: this.pago_dinheiro, debito: this.pago_debito, credito: this.pago_credito, troco: this.pago_troco, itens: this.list}
+      let json=JSON.stringify(a);
+      console.log(json);
       let post_data={json_data:json}
       axios.post('http://localhost:3000/vendaClose', post_data)
-      this.total_a_pagar = this.totalGeral
-      this.vendaCloseFlg = true
+
+      //Reset venda
+      this.vendaID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+      this.total_a_pagar = 0
+      this.totalGeral = 0
+
+      //clean up form
+      this.desconto = 0
+      this.acrescimo = 0
+      this.pago_dinheiro = 0
+      this.pago_credito = 0
+      this.pago_troco = 0 - this.total_a_pagar
+      this.list = []
+
+      this.listQuery.ean = ""
+      this.listQuery.descricao = ""
+
+      this.vendaCloseFlg = false
+      this.vendaCloseOkVisible = true
     },
     addList(ean) {
       // this.list = [{descricao: "boneca", ean: "454545", estoque: "100", id: 4257, pco_venda: "232", unidade: "un"}]
@@ -586,6 +658,7 @@ export default {
       this.total_a_pagar = this.totalGeral - this.desconto + parseFloat(this.acrescimo)
       this.valor_pago = (parseFloat(this.pago_dinheiro) + parseFloat(this.pago_debito) + parseFloat(this.pago_credito))
       this.pago_troco = this.valor_pago - this.total_a_pagar
+      this.pago_falta = this.total_a_pagar - this.pago_falta
       // this.answer = 'Esperando você parar de escrever...'
       // this.debouncedGetAnswer()
     },

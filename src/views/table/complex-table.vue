@@ -59,13 +59,13 @@
 
       <el-table-column label="Descricao" prop="descricao" sortable="custom" align="center" width="390">
         <template slot-scope="scope">
-          <span>{{ scope.row.descricao }}</span>
+          <span>{{ scope.row.descricao | capitalize }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="Preço" prop="pco_venda" sortable="custom" align="center" width="90">
         <template slot-scope="scope">
-          <span>{{ scope.row.pco_venda }}</span>
+          <span>{{ scope.row.pco_venda | money }}</span>
         </template>
       </el-table-column>
 
@@ -102,7 +102,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="80px" style="width: 400px; margin-left:50px;">
         <el-form-item label="EAN" prop="ean">
           <!-- <el-select v-model="temp.ean" class="filter-item" placeholder="EAN"> -->
           <!--el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" /-->
@@ -114,7 +114,8 @@
           <!--el-date-picker v-model="temp.descricao" type="datetime" placeholder="Please pick a date" /-->
         </el-form-item>
         <el-form-item label="Preço" prop="preco">
-          <el-input v-model="temp.pco_venda" />
+
+          <money v-model="temp.pco_venda" v-bind="money" class="el-input__inner"></money>
         </el-form-item>
         <el-form-item label="Unidade" prop="unidade">
           <el-input v-model="temp.unidade" />
@@ -161,6 +162,7 @@ import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import {Money} from 'v-money'
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -175,11 +177,26 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
   return acc
 }, {})
 
+
+
 export default {
   name: 'ComplexTable',
-  components: { Pagination },
-  directives: { waves },
+  components: { Pagination, Money },
+  directives: { waves},
   filters: {
+    money(value) {
+      if (!value) return ''
+      value = value.toString()
+      if (value.indexOf('.')==-1){
+        value += ",00"
+      }
+      return 'R$ ' + value.replace(".",",")
+    },
+    capitalize(value) {
+      if (!value) return ''
+      value = value.toString()
+      return value.charAt(0).toUpperCase() + value.slice(1)
+    },
     statusFilter(status) {
       const statusMap = {
         published: 'success',
@@ -194,6 +211,13 @@ export default {
   },
   data() {
     return {
+      money: {
+          decimal: ',',
+          thousands: '.',
+          prefix: 'R$ ',
+          precision: 2,
+          masked: false /* doesn't work with directive */
+        },
       tableKey: 0,
       list: null,
       total: 0,

@@ -18,7 +18,9 @@ let db = new sqlite3.Database('./data.db', sqlite3.OPEN_READWRITE, (err) => {
   console.log('Connected to the in-memory SQlite database.');
   db.run('CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, ean CHAR(20), descricao CHAR(230), pco_venda CHAR(10), unidade CHAR(10), estoque CHAR(5))');
   //Create vendas table
-  db.run('CREATE TABLE IF NOT EXISTS vendas (id INTEGER PRIMARY KEY AUTOINCREMENT, vendaID INTEGER, vendaItem INTEGER, ean CHAR(10), descricao CHAR(200), unidade CHAR(10), pco_venda CHAR(10), qnt INTEGER, subtotal INTEGER)');
+  db.run('CREATE TABLE IF NOT EXISTS vendas (id INTEGER PRIMARY KEY AUTOINCREMENT, vendaID CHAR(20), cliente int, subtotal int, desconto int, acrescimo int, total int, dinheiro int, debito int, credito int, troco)');
+  //Create vendas_itens table
+  db.run('CREATE TABLE IF NOT EXISTS vendas_itens (id INTEGER PRIMARY KEY AUTOINCREMENT, vendaID CHAR(20), vendaItem INTEGER, ean CHAR(10), descricao CHAR(200), unidade CHAR(10), pco_venda CHAR(10), qnt INTEGER, subtotal INTEGER)');
 
 });
 
@@ -73,10 +75,17 @@ app.use(cors())
 app.post('/vendaClose', function (req, res) {
   json_data = JSON.parse(req.body.json_data)
 
+  db.run('INSERT INTO vendas (vendaID, cliente, subtotal, desconto, acrescimo, total, dinheiro, debito, credito, troco) VALUES (?,?,?,?,?,?,?,?,?,?)', [json_data.vendaID, json_data.cliente, json_data.subtotal, json_data.desconto, json_data.acrescimo, json_data.total, json_data.dinheiro, json_data.debito, json_data.credito, json_data.cliente], function(err) {
+    if (err) {
+      return console.log(err.message);
+    }
+    // get the last insert id
+    console.log(`${this.lastID}`);
+  });
 
   //Insert itens
-  for (var i = 0; i < json_data.length; i++) {
-    db.run('INSERT INTO vendas (vendaID, vendaItem, ean, descricao, pco_venda, unidade, qnt, subtotal) VALUES (?,?,?,?,?,?,?,?)', [json_data[i].vendaID, json_data[i].vendaItem, json_data[i].ean, json_data[i].descricao, json_data[i].pco_venda, json_data[i].unidade, json_data[i].qnt, json_data[i].subtotal], function(err) {
+  for (var i = 0; i < json_data.itens.length; i++) {
+    db.run('INSERT INTO vendas_itens (vendaID, vendaItem, ean, descricao, pco_venda, unidade, qnt, subtotal) VALUES (?,?,?,?,?,?,?,?)', [json_data.itens[i].vendaID, json_data.itens[i].vendaItem, json_data.itens[i].ean, json_data.itens[i].descricao, json_data.itens[i].pco_venda, json_data.itens[i].unidade, json_data.itens[i].qnt, json_data.itens[i].subtotal], function(err) {
         if (err) {
           return console.log(err.message);
         }
