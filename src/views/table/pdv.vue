@@ -7,8 +7,8 @@
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="addList(listQuery.ean)">
         add
       </el-button>
-      <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="getList(); produtosListFlg = true"  />
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="getList(); produtosListFlg = true">
+      <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="getList();" />
+      <el-button v-show='listQuery.descricao' v-waves class="filter-item" type="primary" icon="el-icon-search" @click="getList(); ">
         Procurar
       </el-button>
       <!--el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate(null)">
@@ -21,6 +21,8 @@
       :data="list"
       border
       fit
+      :summary-method="getSummaries"
+      show-summary
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
@@ -76,8 +78,11 @@
 
     <br>
     <el-row :gutter="20">
-      <el-col :span="12"><div class="grid-content bg-purple">Total da compra: R$ {{ totalGeral }}</div></el-col>
-      <el-col :span="12">
+      <el-col :span="20">
+        <div class="grid-content bg-purple">&nbsp;</div>
+      </el-col>
+
+      <el-col :span="4">
         <div class="grid-content bg-purple">
         <el-button v-show="totalGeral>0" v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="vendaClose()">
           Pagar
@@ -209,7 +214,7 @@
 
 
 
-    <el-dialog :visible.sync="vendaCloseFlg" title="Fechamento de venda" width="60%" >
+    <el-dialog :visible.sync="vendaCloseFlg" title="Fechamento de venda" width="60%" center top="5vh">
       <el-form ref="form" :model="form" label-width="170px">
         <el-row :gutter="20">
           <el-col :span="12">
@@ -218,7 +223,7 @@
             </el-row>
             <el-form-item label="Total">
               <!--el-input v-model="totalGeral" v-money="money"></el-input-->
-              <money v-model="totalGeral" v-bind="money" class="el-input__inner"></money>
+              {{totalGeral|money}}
             </el-form-item>
             <el-form-item label="Desconto">
               <!--el-input v-model="desconto" v-money="money"></el-input-->
@@ -408,6 +413,51 @@ export default {
 
   },
   methods: {
+    getSummaries(param) {
+       const { columns, data } = param;
+       const sums = [];
+       columns.forEach((column, index) => {
+         if (index === 0) {
+           sums[index] = '';
+           return;
+         }
+         if (index === 1) {
+           sums[index] = '';
+           return;
+         }
+         if (index === 2) {
+           sums[index] = '';
+           return;
+         }
+         if (index === 3) {
+           sums[index] = '';
+           return;
+         }
+         if (index === 4) {
+           sums[index] = 'Total:';
+           return;
+         }
+         if (index === 6) {
+           sums[index] = '';
+           return;
+         }
+         const values = data.map(item => Number(item[column.property]));
+         if (!values.every(value => isNaN(value))) {
+           sums[index] = 'R$ ' + values.reduce((prev, curr) => {
+             const value = Number(curr);
+             if (!isNaN(value)) {
+               return prev + curr;
+             } else {
+               return prev;
+             }
+           }, 0);
+         } else {
+           sums[index] = 'N/A';
+         }
+       });
+
+       return sums;
+     },
     tt(ean){
       this.listQuery.ean = ean
       this.addList(ean)
@@ -421,11 +471,13 @@ export default {
       this.acrescimo = 0
       this.pago_dinheiro = 0
       this.pago_credito = 0
+      this.totalpago = 0
       this.pago_troco = 0 - this.total_a_pagar
       this.vendaCloseFlg = true
     },
     vendaCloseOk(){
-      let a = {vendaID: this.vendaID, cliente: 0, subtotal: this.totalGeral, desconto: this.desconto, acrescimo: this.acrescimo, total: this.total, dinheiro: this.pago_dinheiro, debito: this.pago_debito, credito: this.pago_credito, troco: this.pago_troco, itens: this.list}
+      this.totalpago = this.pago_dinheiro + this.pago_debito + this.pago_credito
+      let a = {vendaID: this.vendaID, cliente: 0, subtotal: this.totalGeral, desconto: this.desconto, acrescimo: this.acrescimo, total: this.total, dinheiro: this.pago_dinheiro, debito: this.pago_debito, credito: this.pago_credito, totalpago: this.totalpago, troco: this.pago_troco, itens: this.list}
       let json=JSON.stringify(a);
       console.log(json);
       let post_data={json_data:json}
@@ -479,16 +531,28 @@ export default {
       // console.log(this.list);
     },
     getList() {
-      this.listLoading = true
-      fetchList({descricao: this.listQuery.descricao}).then(response => {
-        console.log('response.data.items:', response.data.items)
-        this.produtosList = response.data.items
-        this.total2 = response.data.total
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
+      let descricao = this.listQuery.descricao.trim()
+      console.log('|'+descricao+'|');
+      if (descricao.length > 3){
+        this.produtosListFlg = true
+        this.listLoading = true
+        fetchList({descricao: descricao}).then(response => {
+          console.log('response.data.items:', response.data.items)
+          this.produtosList = response.data.items
+          this.total2 = response.data.total
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
+        })
+      }else{
+        this.$notify({
+          title: 'Procurar',
+          message: 'Digite mais de 3 dígitos',
+          type: 'warning',
+          duration: 2000
+        })
+      }
     },
     handleFilter() {
       this.listQuery.page = 1

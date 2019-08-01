@@ -18,9 +18,13 @@ let db = new sqlite3.Database('./data.db', sqlite3.OPEN_READWRITE, (err) => {
   console.log('Connected to the in-memory SQlite database.');
   db.run('CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, ean CHAR(20), descricao CHAR(230), pco_venda CHAR(10), unidade CHAR(10), estoque CHAR(5))');
   //Create vendas table
-  db.run('CREATE TABLE IF NOT EXISTS vendas (id INTEGER PRIMARY KEY AUTOINCREMENT, vendaID CHAR(20), cliente int, subtotal int, desconto int, acrescimo int, total int, dinheiro int, debito int, credito int, troco)');
+  db.run('CREATE TABLE IF NOT EXISTS vendas (id INTEGER PRIMARY KEY AUTOINCREMENT, vendaID CHAR(20), cliente int, subtotal int, desconto int, acrescimo int, total int, dinheiro int, debito int, credito int, totalpago int, troco int)');
   //Create vendas_itens table
   db.run('CREATE TABLE IF NOT EXISTS vendas_itens (id INTEGER PRIMARY KEY AUTOINCREMENT, vendaID CHAR(20), vendaItem INTEGER, ean CHAR(10), descricao CHAR(200), unidade CHAR(10), pco_venda CHAR(10), qnt INTEGER, subtotal INTEGER)');
+  //Create fornecedor
+  db.run('CREATE TABLE IF NOT EXISTS fornecedor (id INTEGER PRIMARY KEY AUTOINCREMENT, empresa char(50), endereco char(100), tipo char(15), cnpjcpf char(25), contato char(30), fone char(100), email char(100), obs text)');
+  //Create compras
+  //db.run('CREATE TABLE IF NOT EXISTS compras (id INTEGER PRIMARY KEY AUTOINCREMENT, fornecedor int, data char(100), tipo char(15), cnpjcpf char(25), contato char(30), fone char(100), email char(100), obs text)');
 
 });
 
@@ -75,7 +79,7 @@ app.use(cors())
 app.post('/vendaClose', function (req, res) {
   json_data = JSON.parse(req.body.json_data)
 
-  db.run('INSERT INTO vendas (vendaID, cliente, subtotal, desconto, acrescimo, total, dinheiro, debito, credito, troco) VALUES (?,?,?,?,?,?,?,?,?,?)', [json_data.vendaID, json_data.cliente, json_data.subtotal, json_data.desconto, json_data.acrescimo, json_data.total, json_data.dinheiro, json_data.debito, json_data.credito, json_data.cliente], function(err) {
+  db.run('INSERT INTO vendas (vendaID, cliente, subtotal, desconto, acrescimo, total, dinheiro, debito, credito, totalpago, troco) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [json_data.vendaID, json_data.cliente, json_data.subtotal, json_data.desconto, json_data.acrescimo, json_data.total, json_data.dinheiro, json_data.debito, json_data.credito, json_data.totalpago, json_data.troco], function(err) {
     if (err) {
       return console.log(err.message);
     }
@@ -123,6 +127,35 @@ app.get('/dev-api/produtos', function (req, res, next) {
     sqlWhere += "and descricao like '%"+req.query.descricao+"%'"
   }
   sqlStr = "SELECT * FROM produtos "+ sqlWhere + " order by id desc " + sqlLimit ;
+  console.log('sqlStr', sqlStr);
+  db.all(sqlStr, function(err, rows, fields) {
+  // console.log('rows.length:', rows.length);
+  jsonStr = {
+    "code": 20000,
+    "data": {
+        "total": rows.length}
+    }
+   jsonStr.data.items = rows
+   res.send(jsonStr);
+
+  });
+
+})
+app.get('/dev-api/vendas', function (req, res, next) {
+  console.log('req.query:', req.query);
+
+  var sqlWhere = "where 1=1 "
+  var sqlLimit = ""
+  if (req.query.page){
+    sqlLimit = " LIMIT " + (parseInt(req.query.page)-1) * 20 + ", " + req.query.limit
+  }
+  if (req.query.ean){
+    sqlWhere += "and ean like '"+req.query.ean+"'"
+  }
+  if (req.query.descricao){
+    sqlWhere += "and descricao like '%"+req.query.descricao+"%'"
+  }
+  sqlStr = "SELECT * FROM vendas "+ sqlWhere + " order by id desc " + sqlLimit ;
   console.log('sqlStr', sqlStr);
   db.all(sqlStr, function(err, rows, fields) {
   // console.log('rows.length:', rows.length);
