@@ -1,21 +1,32 @@
 <template>
   <div class="app-container">
-  <el-input v-model="vendaID" placeholder="ID" style="width: 150px;" class="filter-item" @keyup.enter.native="handleFilter" />
     <div class="filter-container">
-      <el-input v-model="qnt" placeholder="Qnt" style="width: 50px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.ean" placeholder="EAN" style="width: 200px;" class="filter-item" @keyup.enter.native="addList(listQuery.ean)" />
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="addList(listQuery.ean)">
-        add
-      </el-button>
-      <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="getList();" />
-      <el-button v-show='listQuery.descricao' v-waves class="filter-item" type="primary" icon="el-icon-search" @click="getList(); ">
-        Procurar
-      </el-button>
-      <!--el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate(null)">
-        Incluir
-      </el-button-->
+      <el-form :inline="true"  class="demo-form-inline">
+          <el-form-item label="Quantidade">
+            <el-input-number v-model="qnt"  :min="1" :max="10" style="width: 150px;"></el-input-number>
+          </el-form-item>
+          <el-form-item label="Código">
+            <el-input placeholder="" ref="ean" v-model="listQuery.ean" style="width: 150px;" @keyup.enter.native="addList(listQuery.ean)" autofocus>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+              <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="addList(listQuery.ean)">
+                Incluir
+              </el-button>
+          </el-form-item>
+          <el-form-item label="Procurar">
+            <el-input placeholder="" v-model="listQuery.descricao" style="width: 150px;" @keyup.enter.native="getList();">
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+              <el-button  v-waves class="filter-item" type="primary" icon="el-icon-search" @click="getList(); ">
+                Ok
+              </el-button>
+          </el-form-item>
+      </el-form>
     </div>
     <el-table
+      height="250"
       :key="tableKey"
       v-loading="false"
       :data="list"
@@ -31,13 +42,22 @@
           <span>{{ scope.row.vendaID }}</span>
         </template>
       </el-table-column-->
-      <el-table-column label="item" prop="vendaItem" sortable="custom" align="center" width="80">
+      <!--el-table-column
+        type="index"
+        :index="indexMethod">
+      </el-table-column-->
+      <!-- <el-table-column label="Código" prop="ean" sortable="custom" align="center" width="80">
         <template slot-scope="scope">
-          <span>{{ scope.row.vendaItem }}</span>
+          <span>{{ scope.row.ean }}</span>
+        </template>
+      </el-table-column> -->
+
+      <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
+        <template slot-scope="scope">
+          <span>{{ scope.row.id}}</span>
         </template>
       </el-table-column>
-
-      <el-table-column label="Descricao" prop="descricao" sortable="custom" align="center" width="370">
+      <el-table-column label="Descricao" prop="descricao" sortable="custom" align="center" width="300">
         <template slot-scope="scope">
           <span>{{ scope.row.descricao  | capitalize }}</span>
         </template>
@@ -67,10 +87,11 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Ações" align="center" width="100" class-name="small-padding fixed-width">
+      <el-table-column label="Ações" align="center" width="150" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
-          <el-button size="mini" type="danger" @click="handleDelete(row)">
-            X
+          <el-button type="primary" size="mini" icon="el-icon-edit" @click="handleUpdate(row)">
+          </el-button>
+          <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(row)">
           </el-button>
         </template>
       </el-table-column>
@@ -78,8 +99,11 @@
 
     <br>
     <el-row :gutter="20">
-      <el-col :span="20">
+      <el-col :span="10">
         <div class="grid-content bg-purple">&nbsp;</div>
+      </el-col>
+      <el-col :span="10">
+        <div class="grid-content bg-purple">Total: R$ {{this.totalGeral | money}}</div>
       </el-col>
 
       <el-col :span="4">
@@ -100,12 +124,12 @@
         <el-form-item label="EAN" prop="ean">
           <el-input v-model="temp.ean" />
         </el-form-item>
+
         <el-form-item label="Descrição" prop="descricao">
           <el-input v-model="temp.descricao" />
-          <!--el-date-picker v-model="temp.descricao" type="datetime" placeholder="Please pick a date" /-->
         </el-form-item>
+
         <el-form-item label="Preço" prop="preco">
-          <!--el-input v-model="temp.pco_venda" v-money="money"/-->
           <money v-model="temp.pco_venda" v-bind="money" class="el-input__inner"></money>
         </el-form-item>
         <el-form-item label="Unidade" prop="unidade">
@@ -131,6 +155,42 @@
           Cancela
         </el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+          Confirma
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormQntVisible">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+
+        <el-form-item label="ID" prop="id">
+          {{temp2.id}}
+        </el-form-item>
+        <el-form-item label="EAN" prop="ean">
+          {{temp2.ean}}
+        </el-form-item>
+        <el-form-item label="Descrição" prop="descricao">
+          {{temp2.descricao}}
+        </el-form-item>
+        <el-form-item label="Preço" prop="preco">
+          {{temp2.pco_venda | money}}
+        </el-form-item>
+        <el-form-item label="Unidade" prop="unidade">
+          {{temp2.unidade}}
+        </el-form-item>
+        <el-form-item label="Quantidade" prop="qnt">
+          <el-input-number v-model="temp2.qnt" @change="temp2.subtotal = temp2.qnt * temp2.pco_venda" :min="1" :max="10"></el-input-number>
+        </el-form-item>
+        <el-form-item label="subtotal" prop="total">
+          {{temp2.subtotal | money}}
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormQntVisible = false">
+          Cancela
+        </el-button>
+        <el-button type="primary" @click="updateData()">
           Confirma
         </el-button>
       </div>
@@ -361,6 +421,7 @@ export default {
       vendaItem: 0,
       produtosListFlg: false,
       vendaCloseFlg: false,
+      dialogFormQntVisible: false,
       produtosListVisible: false,
       vendaCloseOkVisible: false,
       tableKey: 0,
@@ -392,6 +453,15 @@ export default {
         type: '',
         status: 'published'
       },
+      temp2: {
+        id: undefined,
+        importance: 1,
+        remark: '',
+        timestamp: new Date(),
+        title: '',
+        type: '',
+        status: 'published'
+      },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
@@ -413,6 +483,9 @@ export default {
 
   },
   methods: {
+    indexMethod(index) {
+       return index * 2;
+     },
     getSummaries(param) {
        const { columns, data } = param;
        const sums = [];
@@ -463,6 +536,11 @@ export default {
       this.addList(ean)
     },
     vendaClose(){
+      this.totalGeral = 0
+      //Totaliza
+      for (const v of this.list) {
+        this.totalGeral += v.subtotal
+      }
 
       this.total_a_pagar = this.totalGeral
 
@@ -511,7 +589,7 @@ export default {
         if (response.data.items.length > 0){
 
           // Caso encontre o código de barra no banco
-          this.list.push({vendaID: this.vendaID, vendaItem: this.vendaItem++, descricao: response.data.items[0].descricao, pco_venda: response.data.items[0].pco_venda, unidade: response.data.items[0].unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_venda))})
+          this.list.unshift({id: response.data.items[0].id, vendaID: this.vendaID, ean: response.data.items[0].ean, descricao: response.data.items[0].descricao, pco_venda: response.data.items[0].pco_venda, unidade: response.data.items[0].unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_venda))})
           this.total = response.data.total
 
           this.totalGeral += (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_venda))
@@ -521,6 +599,10 @@ export default {
           setTimeout(() => {
             this.listLoading = false
           }, 1.5 * 1000)
+          this.listQuery.ean = ""
+          this.qnt = 1
+          this.listQuery.descricao = ""
+          this.$refs.ean.focus();
         }else{
           // Caso não encontre o código de barra no banco pula para Incluir
           this.handleCreate(this.listQuery.ean)
@@ -545,6 +627,7 @@ export default {
             this.listLoading = false
           }, 1.5 * 1000)
         })
+
       }else{
         this.$notify({
           title: 'Procurar',
@@ -553,6 +636,7 @@ export default {
           duration: 2000
         })
       }
+      this.listQuery.descricao = ""
     },
     handleFilter() {
       this.listQuery.page = 1
@@ -603,6 +687,8 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+      this.listQuery.ean = ""
+      this.qnt = 1
     },
     createData() {
       this.$refs['dataForm'].validate((valid) => {
@@ -610,7 +696,7 @@ export default {
           createArticle(this.temp).then(() => {
             //this.list.unshift(this.temp)
             // Caso encontre o código de barra no banco
-            this.list.push({vendaID: this.vendaID, vendaItem: this.vendaItem++, descricao: this.temp.descricao, pco_venda: this.temp.pco_venda, unidade: this.temp.unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))})
+            this.list.push({id: this.temp.id, vendaID: this.vendaID, vendaItem: this.vendaItem++, descricao: this.temp.descricao, pco_venda: this.temp.pco_venda, unidade: this.temp.unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))})
             this.total = this.list.length
 
             this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))
@@ -627,10 +713,11 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
+      console.log(row);
+      this.temp2 = Object.assign({}, row) // copy obj
+      this.temp2.timestamp = new Date(this.temp2.timestamp)
+      this.dialog2Status = 'update'
+      this.dialogFormQntVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -638,13 +725,13 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
+          const tempData = Object.assign({}, this.temp2)
+          // tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+          // updateArticle(tempData).then(() => {
             for (const v of this.list) {
-              if (v.id === this.temp.id) {
+              if (v.id === this.temp2.id) {
                 const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
+                this.list.splice(index, 1, this.temp2)
                 break
               }
             }
@@ -655,7 +742,13 @@ export default {
               type: 'success',
               duration: 2000
             })
-          })
+            //Totaliza
+            this.totalGeral = 0
+            for (const v of this.list) {
+              this.totalGeral += v.subtotal
+            }
+            this.dialogFormQntVisible = false
+          // })
         }
       })
     },

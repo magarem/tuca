@@ -31,10 +31,10 @@ const tableRouter = {
     //   meta: { title: 'Inline Edit' }
     // },
     {
-      path: 'pdv',
-      component: () => import('@/views/table/pdv'),
-      name: 'PDV',
-      meta: { title: 'PDV' }
+      path: 'balcao',
+      component: () => import('@/views/table/balcao'),
+      name: 'bacão',
+      meta: { title: 'Balcão' }
     },
     {
       path: 'complex-table',
