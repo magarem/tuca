@@ -150,7 +150,7 @@ app.get('/dev-api/vendas', function (req, res, next) {
     sqlLimit = " LIMIT " + (parseInt(req.query.page)-1) * 20 + ", " + req.query.limit
   }
   if (req.query.ean){
-    sqlWhere += "and ean like '"+req.query.ean+"'"
+    sqlWhere += "and venda like '"+req.query.ean+"'"
   }
   if (req.query.descricao){
     sqlWhere += "and descricao like '%"+req.query.descricao+"%'"
@@ -170,6 +170,27 @@ app.get('/dev-api/vendas', function (req, res, next) {
   });
 
 })
+
+app.get('/dev-api/vendaItens', function (req, res, next) {
+  console.log('req.query:', req.query);
+
+
+  sqlStr = "SELECT * FROM vendas_itens where vendaId = '" + req.query.vendaID + "'" ;
+  console.log('sqlStr', sqlStr);
+  db.all(sqlStr, function(err, rows, fields) {
+  // console.log('rows.length:', rows.length);
+  jsonStr = {
+    "code": 20000,
+    "data": {
+        "total": rows.length}
+    }
+   jsonStr.data.items = rows
+   res.send(jsonStr);
+
+  });
+
+})
+
 
 app.post('/dev-api/produto', function (req, res, next) {
 
