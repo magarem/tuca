@@ -3,7 +3,24 @@
     <div class="filter-container">
       <el-input v-model="listQuery.ean" placeholder="EAN" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="handleFilter" />
-
+      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
+        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
+      </el-select>
+      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
+      </el-select>
+      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
+        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
+      </el-select> -->
+      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
+        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
+      </el-select>
+      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
+      </el-select>
+      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
+        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
+      </el-select> -->
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Procurar
       </el-button>
@@ -26,106 +43,124 @@
       fit
       highlight-current-row
       style="width: 100%;"
-      @sort-change="sortChange"
-       >
+      @sort-change="sortChange">
       <!--el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column-->
 
-      <el-table-column label="N" prop="id" sortable="custom" align="center" width="50">
+      <el-table-column label="Nome" prop="nome" sortable="custom" align="center" width="400">
         <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
+          <span>{{ scope.row.nome  | capitalize }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Código" prop="vendaID" sortable="custom" align="center" width="200">
+      <el-table-column label="Tipo" prop="tipo" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
-          <span><a href='' @click.prevent="getList_vendaItens(scope.row.vendaID)">{{ scope.row.vendaID }}</a></span>
+          <span>{{ scope.row.tipo | capitalize }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Cliente" prop="cliente" sortable="custom" align="center" width="70">
+      <el-table-column label="Doc" prop="doc" sortable="custom" align="center" width="90">
         <template slot-scope="scope">
-          <span>{{ scope.row.cliente | capitalize }}</span>
+          <span>{{ scope.row.doc | capitalize }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Subtotal" prop="subtotal" sortable="custom" align="center" width="90">
+      <el-table-column label="Contato" prop="contato" sortable="custom" align="center" width="200">
         <template slot-scope="scope">
-          <span>{{ scope.row.subtotal | money }}</span>
+          <span>{{ scope.row.contato }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Acrescimo" prop="Acrescimo" sortable="custom" align="center" width="90">
+      <el-table-column label="Fone" prop="fone" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.acrescimo | money }}</span>
+          <span>{{ scope.row.fone }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Desconto" prop="desconto" sortable="custom" align="center" width="90">
+      <el-table-column label="Fone2" prop="fone2" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.desconto | money }}</span>
+          <span>{{ scope.row.fone2 }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Dinheiro" prop="dinheiro" sortable="custom" align="center" width="100">
+      <el-table-column label="Email" prop="email" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.dinheiro | money }}</span>
+          <span>{{ scope.row.email }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Débito" prop="debito" sortable="custom" align="center" width="100">
+      <el-table-column label="Endereço" prop="endereco" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.debito | money }}</span>
+          <span>{{ scope.row.endereco }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Crédito" prop="credito" sortable="custom" align="center" width="100">
+      <el-table-column label="Obs" prop="obs" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.credito | money }}</span>
+          <span>{{ scope.row.obs }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Pago" prop="totalpago" sortable="custom" align="center" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.totalpago | money }}</span>
+      <el-table-column label="Actions" align="center" width="150" class-name="small-padding fixed-width">
+        <template slot-scope="{row}">
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+            Edit
+          </el-button>
+          <!--el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
+            Publish
+          </el-button>
+          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
+            Draft
+          </el-button-->
+          <el-button  size="mini" type="danger" @click="handleDelete(row)">
+            Delete
+          </el-button>
         </template>
       </el-table-column>
-
-      <el-table-column label="Troco" prop="troco" sortable="custom" align="center" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.troco | money }}</span>
-        </template>
-      </el-table-column>
-
-
     </el-table>
 
-    <!--pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" /-->
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="80px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="EAN" prop="ean">
-          <!-- <el-select v-model="temp.ean" class="filter-item" placeholder="EAN"> -->
-          <!--el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" /-->
-          <el-input v-model="temp.ean" />
-          <!-- </el-select> -->
-        </el-form-item>
-        <el-form-item label="Descrição" prop="descricao">
-          <el-input v-model="temp.descricao" />
-          <!--el-date-picker v-model="temp.descricao" type="datetime" placeholder="Please pick a date" /-->
-        </el-form-item>
-        <el-form-item label="Preço" prop="preco">
 
-          <money v-model="temp.pco_venda" v-bind="money" class="el-input__inner"></money>
+        <el-form-item label="Nome" prop="nome">
+          <el-input v-model="temp.nome" />
         </el-form-item>
-        <el-form-item label="Unidade" prop="unidade">
-          <el-input v-model="temp.unidade" />
+
+        <el-form-item label="Tipo" prop="tipo">
+          <el-input v-model="temp.tipo" />
         </el-form-item>
-        <el-form-item label="Estoque" prop="estoque">
-          <el-input v-model="temp.estoque" />
+
+        <el-form-item label="Doc" prop="doc">
+          <el-input v-model="temp.doc" />
+        </el-form-item>
+
+        <el-form-item label="Contato" prop="contato">
+          <el-input v-model="temp.contato" />
+        </el-form-item>
+
+        <el-form-item label="Fone" prop="fone">
+          <el-input v-model="temp.fone" />
+        </el-form-item>
+
+        <el-form-item label="Fone2" prop="fone2">
+          <el-input v-model="temp.fone2" />
+        </el-form-item>
+
+        <el-form-item label="Email" prop="email">
+          <el-input v-model="temp.email" />
+        </el-form-item>
+
+        <el-form-item label="Endereço" prop="endereco">
+          <el-input v-model="temp.endereco" />
+        </el-form-item>
+
+        <el-form-item label="Obs" prop="obs">
+          <el-input v-model="temp.obs" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -138,102 +173,30 @@
       </div>
     </el-dialog>
 
-    <el-dialog :visible.sync="dialogPvVisible" title="Venda" width="80%" top="5vh" center>
-       <el-row :gutter="20">
-          <el-col :span="4"><div class="grid-content bg-purple"><b>Venda #:</b> {{vendaNumero}}</div></el-col>
-          <el-col :span="8"><div class="grid-content bg-purple"><b>Código:</b> {{vendaID}}</div></el-col>
-          <el-col :span="6"><div class="grid-content bg-purple"><b>Data:</b> {{vendaData}}</div></el-col>
-          <el-col :span="6"><div class="grid-content bg-purple"><b>Valor:</b> {{vendaTotal|money}}</div></el-col>
-       </el-row>
-       <br>
-      <el-table
-        height="250"
-        :key="tableKey"
-        v-loading="false"
-        :data="list2"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%;"
-        @sort-change="sortChange">
-        <!-- <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
-          <template slot-scope="scope">
-            <span>{{ scope.row.id }}</span>
-          </template>
-        </el-table-column> -->
-        <el-table-column label="Código" prop="ean" sortable="custom" align="center" width="80">
-          <template slot-scope="scope">
-            <span>{{ scope.row.ean }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="Descricao" prop="descricao" sortable="custom" align="center" width="300">
-          <template slot-scope="scope">
-            <span>{{ scope.row.descricao | capitalize }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="Unidade" prop="unidade" sortable="custom" align="center" width="120">
-          <template slot-scope="scope">
-            <span>{{ scope.row.unidade }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="Preço" prop="pco_venda" sortable="custom" align="center" width="90">
-          <template slot-scope="scope">
-            <span>{{ scope.row.pco_venda | money }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="Qnt" prop="qnt" sortable="custom" align="center" width="70">
-          <template slot-scope="scope">
-            <span>{{ scope.row.qnt }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="subtotal" prop="subtotal" sortable="custom" align="center" width="100">
-          <template slot-scope="scope">
-            <span>{{ scope.row.subtotal | money }}</span>
-          </template>
-        </el-table-column>
-
-
+    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
+      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
+        <el-table-column prop="key" label="Channel" />
+        <el-table-column prop="pv" label="Pv" />
       </el-table>
-
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Fechar</el-button>
+        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
       </span>
     </el-dialog>
-
-
-
-
   </div>
 </template>
 
 <script>
-import { fetchList, fetchList_vendaItens, fetchPv, createArticle, updateArticle } from '@/api/vendas'
+import { fetchList, create, update, deleteItem } from '@/api/clientes'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-import axios from 'axios';
 import {Money} from 'v-money'
 
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
-
-// arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
 
 
 
 export default {
-  name: 'ComplexTable',
+  name: 'Clientes',
   components: { Pagination, Money },
   directives: { waves},
   filters: {
@@ -264,9 +227,6 @@ export default {
   },
   data() {
     return {
-      vendaNumero: 0,
-      vendaTotal: 0,
-      vendaID: '',
       money: {
           decimal: ',',
           thousands: '.',
@@ -274,10 +234,8 @@ export default {
           precision: 2,
           masked: false /* doesn't work with directive */
         },
-      vendaData: '',
       tableKey: 0,
-      list: [],
-      list2: [],
+      list: null,
       total: 0,
       listLoading: true,
       listQuery: {
@@ -289,7 +247,6 @@ export default {
         sort: '+id'
       },
       importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
@@ -322,35 +279,11 @@ export default {
     this.getList()
   },
   methods: {
-    getList(id) {
+    getList() {
       this.listLoading = true
-      console.log('id:', id);
       fetchList(this.listQuery).then(response => {
         console.log('response.data.items:', response.data.items)
         this.list = response.data.items
-        this.total = response.data.total
-
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
-    },
-    getList_vendaItens(id) {
-      this.listLoading = true
-      this.dialogPvVisible=true
-      console.log('id:', id);
-
-      // Get vendas info
-      var item = this.list.find(item => item.vendaID === id);
-      this.vendaNumero = item.id
-      this.vendaID = id
-      this.vendaData = new Date(parseFloat(item.created)).toLocaleDateString()
-      this.vendaTotal = item.subtotal - item.desconto + parseFloat(item.acrescimo)
-
-      fetchList_vendaItens({vendaID: id}).then(response => {
-        console.log('response.data.items:', response.data.items)
-        this.list2 = response.data.items
         this.total = response.data.total
 
         // Just to simulate the time of the request
@@ -408,7 +341,7 @@ export default {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
+          create(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
@@ -419,6 +352,18 @@ export default {
             })
           })
         }
+      })
+    },
+    deleteData() {
+      delete(this.temp).then(() => {
+        this.list.unshift(this.temp)
+        this.dialogFormVisible = false
+        this.$notify({
+          title: 'Success',
+          message: 'Created Successfully',
+          type: 'success',
+          duration: 2000
+        })
       })
     },
     handleUpdate(row) {
@@ -435,7 +380,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
+          update(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
@@ -456,13 +401,19 @@ export default {
     },
     handleDelete(row) {
       this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
+        title: 'Sucesso',
+        message: 'Exclusão de registro',
         type: 'success',
         duration: 2000
       })
       const index = this.list.indexOf(row)
       this.list.splice(index, 1)
+
+      // Server order
+      deleteItem(row).then(() => {
+        console.log('--->', row.id);
+      })
+
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {

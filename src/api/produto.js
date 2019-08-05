@@ -8,7 +8,7 @@ export function fetchList(query) {
   })
 }
 
-export function fetchArticle(id) {
+export function fetch(id) {
   return request({
     url: '/article/detail',
     method: 'get',
@@ -24,7 +24,7 @@ export function fetchPv(pv) {
   })
 }
 
-export function createArticle(data) {
+export function create(data) {
   return request({
     url: 'http://localhost:3000/dev-api/produto',
     method: 'post',
@@ -32,7 +32,7 @@ export function createArticle(data) {
   })
 }
 
-export function updateArticle(data) {
+export function update(data) {
   return request({
     url: 'http://localhost:3000/dev-api/produto',
     method: 'patch',

@@ -57,9 +57,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Preço" prop="pco_venda" sortable="custom" align="center" width="90">
+      <el-table-column label="Preço" prop="pco_compra" sortable="custom" align="center" width="90">
         <template slot-scope="scope">
-          <span>{{ scope.row.pco_venda | money }}</span>
+          <span>{{ scope.row.pco_custo | money }}</span>
         </template>
       </el-table-column>
 
@@ -96,7 +96,7 @@
 
       <el-col :span="4">
         <div class="grid-content bg-purple">
-        <el-button  type="success" round v-show="totalGeral>0" v-waves :loading="downloadLoading" class="filter-item"  icon="el-icon-download" @click="vendaClose()">
+        <el-button  type="success" round v-show="totalGeral>0" v-waves :loading="downloadLoading" class="filter-item"  icon="el-icon-download" @click="compraClose()">
           Pagar
         </el-button>
         </div>
@@ -119,7 +119,7 @@
         </el-form-item>
 
         <el-form-item label="Preço" prop="preco">
-          <money v-model="temp.pco_venda" v-bind="money" class="el-input__inner"></money>
+          <money v-model="temp.pco_compra" v-bind="money" class="el-input__inner"></money>
         </el-form-item>
         <el-form-item label="Unidade" prop="unidade">
           <el-input v-model="temp.unidade" />
@@ -151,13 +151,13 @@
           {{temp2.descricao}}
         </el-form-item>
         <el-form-item label="Preço" prop="preco">
-          {{temp2.pco_venda | money}}
+          {{temp2.pco_compra | money}}
         </el-form-item>
         <el-form-item label="Unidade" prop="unidade">
           {{temp2.unidade}}
         </el-form-item>
         <el-form-item label="Quantidade" prop="qnt">
-          <el-input-number v-model="temp2.qnt" @change="temp2.subtotal = temp2.qnt * temp2.pco_venda" :min="1" :max="10"></el-input-number>
+          <el-input-number v-model="temp2.qnt" @change="temp2.subtotal = temp2.qnt * temp2.pco_compra" :min="1" :max="10"></el-input-number>
         </el-form-item>
         <el-form-item label="subtotal" prop="total">
           {{temp2.subtotal | money}}
@@ -193,9 +193,9 @@
             <span>{{ scope.row.unidade }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Preço" prop="pco_venda" sortable="custom" align="center" width="130">
+        <el-table-column label="Preço" prop="pco_compra" sortable="custom" align="center" width="130">
           <template slot-scope="scope">
-            <span>{{ scope.row.pco_venda | money}}</span>
+            <span>{{ scope.row.pco_compra | money}}</span>
           </template>
         </el-table-column>
 
@@ -216,12 +216,12 @@
       </span>
     </el-dialog>
 
-    <el-dialog :visible.sync="vendaCloseFlg" title="Fechamento de venda" width="60%" center top="5vh">
+    <el-dialog :visible.sync="compraCloseFlg" title="Fechamento de compra" width="60%" center top="5vh">
       <el-form ref="form" :model="form" label-width="170px">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-row>
-              <el-col :span="24"><div class="grid-content bg-purple-dark">Venda</div></el-col>
+              <el-col :span="24"><div class="grid-content bg-purple-dark">compra</div></el-col>
             </el-row>
             <el-form-item label="Total">
               <!--el-input v-model="totalGeral" v-money="money"></el-input-->
@@ -268,20 +268,20 @@
          </el-row>
         </el-form>
         <span slot="footer" class="dialog-footer">
-          <el-button v-if="pago_troco>=0" type="primary" @click="vendaCloseOk(); dialogPvVisible = false">Confirma</el-button>
+          <el-button v-if="pago_troco>=0" type="primary" @click="compraCloseOk(); dialogPvVisible = false">Confirma</el-button>
         </span>
     </el-dialog>
 
 
     <el-dialog
-      title="Venda registrada"
-      :visible.sync="vendaCloseOkVisible"
+      title="compra registrada"
+      :visible.sync="compraCloseOkVisible"
       width="30%"
       >
-      <span>Venda registrada com sucesso!</span>
+      <span>compra registrada com sucesso!</span>
       <span slot="footer" class="dialog-footer">
         <!--el-button @click="dialogVisible = false">Cancel</el-button-->
-        <el-button type="primary" @click="vendaCloseOkEnd">Ok</el-button>
+        <el-button type="primary" @click="compraCloseOkEnd">Ok</el-button>
       </span>
     </el-dialog>
 
@@ -343,16 +343,16 @@ export default {
   },
   data() {
     return {
-      //vendaItem: 0,
-      vendaItemId: 0,
+      //compraItem: 0,
+      compraItemId: 0,
       totalItens: 0,
       money: {
-          decimal: ',',
-          thousands: '.',
-          prefix: 'R$ ',
-          precision: 2,
-          masked: false /* doesn't work with directive */
-        },
+        decimal: ',',
+        thousands: '.',
+        prefix: 'R$ ',
+        precision: 2,
+        masked: false /* doesn't work with directive */
+      },
       form:{},
       valor_pago: 0,
       pago_troco: 0,
@@ -363,13 +363,13 @@ export default {
       desconto: 0,
       acrescimo: 0,
       pago_falta: 0,
-      vendaID: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-      vendaItem: 0,
+      compraID: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      compraItem: 0,
       produtosListFlg: false,
-      vendaCloseFlg: false,
+      compraCloseFlg: false,
       dialogFormQntVisible: false,
       produtosListVisible: false,
-      vendaCloseOkVisible: false,
+      compraCloseOkVisible: false,
       tableKey: 0,
       list: [],
       produtosList: [],
@@ -479,12 +479,10 @@ export default {
        return sums;
      },
     tt(ean){
-      //this.listQuery.ean = ean
-
       this.addList(ean)
       this.produtosListFlg = false
     },
-    vendaClose(){
+    compraClose(){
       this.totalGeral = 0
       //Totaliza
       for (const v of this.list) {
@@ -500,18 +498,18 @@ export default {
       this.pago_credito = 0
       this.totalpago = 0
       this.pago_troco = 0 - this.total_a_pagar
-      this.vendaCloseFlg = true
+      this.compraCloseFlg = true
     },
-    vendaCloseOk(){
+    compraCloseOk(){
       this.totalpago = this.pago_dinheiro + this.pago_debito + this.pago_credito
-      let a = {vendaID: this.vendaID, cliente: 0, subtotal: this.totalGeral, desconto: this.desconto, acrescimo: this.acrescimo, total: this.total, dinheiro: this.pago_dinheiro, debito: this.pago_debito, credito: this.pago_credito, totalpago: this.totalpago, troco: this.pago_troco, itens: this.list}
+      let a = {compraID: this.compraID, cliente: 0, subtotal: this.totalGeral, desconto: this.desconto, acrescimo: this.acrescimo, total: this.total, dinheiro: this.pago_dinheiro, debito: this.pago_debito, credito: this.pago_credito, totalpago: this.totalpago, troco: this.pago_troco, itens: this.list}
       let json=JSON.stringify(a);
       console.log(json);
       let post_data={json_data:json}
-      axios.post('http://localhost:3000/vendaClose', post_data)
+      axios.post('http://localhost:3000/compraClose', post_data)
 
-      //Reset venda
-      this.vendaID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+      //Reset compra
+      this.compraID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
       this.total_a_pagar = 0
       this.totalGeral = 0
 
@@ -527,26 +525,26 @@ export default {
       this.listQuery.ean = ""
       this.listQuery.descricao = ""
 
-      this.vendaCloseFlg = false
-      this.vendaCloseOkVisible = true
-      this.vendaItem = 0;
+      this.compraCloseFlg = false
+      this.compraCloseOkVisible = true
+      this.compraItem = 0;
 
 
     },
-    vendaCloseOkEnd(){
+    compraCloseOkEnd(){
       this.listQuery.descricao = ""
       this.$refs.ean.focus();
-      this.vendaCloseOkVisible = false;
+      this.compraCloseOkVisible = false;
     },
     addList(ean) {
       this.listLoading = true
       fetchList({ean: ean}).then(response => {
         if (response.data.items.length > 0){
-          //this.vendaItem++
-          this.vendaItemId++
+          //this.compraItem++
+          this.compraItemId++
           // Caso encontre o código de barra no banco
-          let subtotal = (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_venda))
-          this.list.unshift({id: this.vendaItemId, ean: this.listQuery.ean, vendaID: this.vendaID, ean: response.data.items[0].ean, descricao: response.data.items[0].descricao, pco_venda: response.data.items[0].pco_venda, unidade: response.data.items[0].unidade, qnt: this.qnt, subtotal: subtotal})
+          let subtotal = (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_compra))
+          this.list.unshift({id: this.compraItemId, ean: this.listQuery.ean, compraID: this.compraID, ean: response.data.items[0].ean, descricao: response.data.items[0].descricao, pco_compra: response.data.items[0].pco_compra, unidade: response.data.items[0].unidade, qnt: this.qnt, subtotal: subtotal})
           this.total = response.data.total
 
           //itens sum
@@ -554,7 +552,7 @@ export default {
           for (let t=0; t<this.list.length; t++){
             this.totalItens += this.list[t].qnt
           }
-          this.totalGeral += (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_venda))
+          this.totalGeral += (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_compra))
           // Just to simulate the time of the request
           setTimeout(() => {
             this.listLoading = false
@@ -569,7 +567,7 @@ export default {
         }
       })
 
-      // this.list.push({descricao: "boneca2", ean: "454545", estoque: "100", id: 4257, pco_venda: "232", unidade: "un"})
+      // this.list.push({descricao: "boneca2", ean: "454545", estoque: "100", id: 4257, pco_compra: "232", unidade: "un"})
       // console.log(this.list);
     },
     getList() {
@@ -661,13 +659,13 @@ export default {
           createArticle(this.temp).then(() => {
             //this.list.unshift(this.temp)
             // Caso encontre o código de barra no banco
-            this.vendaItemId++
-            let aux = {id: this.vendaItemId, ean: this.temp.ean, descricao: this.temp.descricao, pco_venda: this.temp.pco_venda, unidade: this.temp.unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))}
+            this.compraItemId++
+            let aux = {id: this.compraItemId, ean: this.temp.ean, descricao: this.temp.descricao, pco_compra: this.temp.pco_compra, unidade: this.temp.unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(this.temp.pco_compra))}
             console.log(aux);
             this.list.unshift(aux)
             this.total = this.list.length
 
-            this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))
+            this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_compra))
 
             //itens sum
             this.totalItens = 0
@@ -750,7 +748,7 @@ export default {
       for (let t=0; t<this.list.length; t++){
         this.totalItens += this.list[t].qnt
       }
-      // this.vendaItem--
+      // this.compraItem--
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {

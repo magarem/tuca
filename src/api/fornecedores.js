@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: 'http://localhost:3000/dev-api/vendas',
+    url: 'http://localhost:3000/dev-api/fornecedores',
     method: 'get',
     params: query
   })
@@ -32,18 +32,26 @@ export function fetchPv(pv) {
   })
 }
 
-export function createArticle(data) {
+export function create(data) {
   return request({
-    url: 'http://localhost:3000/dev-api/produto',
+    url: 'http://localhost:3000/dev-api/fornecedor',
     method: 'post',
     data
   })
 }
 
-export function updateArticle(data) {
+export function update(data) {
   return request({
-    url: 'http://localhost:3000/dev-api/produto',
+    url: 'http://localhost:3000/dev-api/fornecedor',
     method: 'patch',
+    data
+  })
+}
+
+export function deleteItem(data) {
+  return request({
+    url: 'http://localhost:3000/dev-api/fornecedor',
+    method: 'delete',
     data
   })
 }

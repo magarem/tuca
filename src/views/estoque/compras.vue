@@ -40,9 +40,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Código" prop="vendaID" sortable="custom" align="center" width="200">
+      <el-table-column label="Código" prop="compraID" sortable="custom" align="center" width="200">
         <template slot-scope="scope">
-          <span><a href='' @click.prevent="getList_vendaItens(scope.row.vendaID)">{{ scope.row.vendaID }}</a></span>
+          <span><a href='' @click.prevent="getList_compraItens(scope.row.compraID)">{{ scope.row.compraID }}</a></span>
         </template>
       </el-table-column>
 
@@ -119,7 +119,7 @@
         </el-form-item>
         <el-form-item label="Preço" prop="preco">
 
-          <money v-model="temp.pco_venda" v-bind="money" class="el-input__inner"></money>
+          <money v-model="temp.pco_compra" v-bind="money" class="el-input__inner"></money>
         </el-form-item>
         <el-form-item label="Unidade" prop="unidade">
           <el-input v-model="temp.unidade" />
@@ -138,12 +138,12 @@
       </div>
     </el-dialog>
 
-    <el-dialog :visible.sync="dialogPvVisible" title="Venda" width="80%" top="5vh" center>
+    <el-dialog :visible.sync="dialogPvVisible" title="compra" width="80%" top="5vh" center>
        <el-row :gutter="20">
-          <el-col :span="4"><div class="grid-content bg-purple"><b>Venda #:</b> {{vendaNumero}}</div></el-col>
-          <el-col :span="8"><div class="grid-content bg-purple"><b>Código:</b> {{vendaID}}</div></el-col>
-          <el-col :span="6"><div class="grid-content bg-purple"><b>Data:</b> {{vendaData}}</div></el-col>
-          <el-col :span="6"><div class="grid-content bg-purple"><b>Valor:</b> {{vendaTotal|money}}</div></el-col>
+          <el-col :span="4"><div class="grid-content bg-purple"><b>compra #:</b> {{compraNumero}}</div></el-col>
+          <el-col :span="8"><div class="grid-content bg-purple"><b>Código:</b> {{compraID}}</div></el-col>
+          <el-col :span="6"><div class="grid-content bg-purple"><b>Data:</b> {{compraData}}</div></el-col>
+          <el-col :span="6"><div class="grid-content bg-purple"><b>Valor:</b> {{compraTotal|money}}</div></el-col>
        </el-row>
        <br>
       <el-table
@@ -177,9 +177,9 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Preço" prop="pco_venda" sortable="custom" align="center" width="90">
+        <el-table-column label="Preço" prop="pco_compra" sortable="custom" align="center" width="90">
           <template slot-scope="scope">
-            <span>{{ scope.row.pco_venda | money }}</span>
+            <span>{{ scope.row.pco_compra | money }}</span>
           </template>
         </el-table-column>
 
@@ -210,7 +210,7 @@
 </template>
 
 <script>
-import { fetchList, fetchList_vendaItens, fetchPv, createArticle, updateArticle } from '@/api/vendas'
+import { fetchList, fetchList_compraItens } from '@/api/compras'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -264,9 +264,9 @@ export default {
   },
   data() {
     return {
-      vendaNumero: 0,
-      vendaTotal: 0,
-      vendaID: '',
+      compraNumero: 0,
+      compraTotal: 0,
+      compraID: '',
       money: {
           decimal: ',',
           thousands: '.',
@@ -274,7 +274,7 @@ export default {
           precision: 2,
           masked: false /* doesn't work with directive */
         },
-      vendaData: '',
+      compraData: '',
       tableKey: 0,
       list: [],
       list2: [],
@@ -336,19 +336,19 @@ export default {
         }, 1.5 * 1000)
       })
     },
-    getList_vendaItens(id) {
+    getList_compraItens(id) {
       this.listLoading = true
       this.dialogPvVisible=true
       console.log('id:', id);
 
-      // Get vendas info
-      var item = this.list.find(item => item.vendaID === id);
-      this.vendaNumero = item.id
-      this.vendaID = id
-      this.vendaData = new Date(parseFloat(item.created)).toLocaleDateString()
-      this.vendaTotal = item.subtotal - item.desconto + parseFloat(item.acrescimo)
+      // Get compras info
+      var item = this.list.find(item => item.compraID === id);
+      this.compraNumero = item.id
+      this.compraID = id
+      this.compraData = new Date(parseFloat(item.created)).toLocaleDateString()
+      this.compraTotal = item.subtotal - item.desconto + parseFloat(item.acrescimo)
 
-      fetchList_vendaItens({vendaID: id}).then(response => {
+      fetchList_compraItens({compraID: id}).then(response => {
         console.log('response.data.items:', response.data.items)
         this.list2 = response.data.items
         this.total = response.data.total

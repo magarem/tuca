@@ -5,31 +5,13 @@ import Layout from '@/layout'
 const tableRouter = {
   path: '/table',
   component: Layout,
-  redirect: '/table/complex-table',
-  name: 'Table',
+  redirect: '/table',
+  name: 'Vendas',
   meta: {
-    title: 'Table',
+    title: 'Vendas',
     icon: 'table'
   },
   children: [
-    // {
-    //   path: 'dynamic-table',
-    //   component: () => import('@/views/table/dynamic-table/index'),
-    //   name: 'DynamicTable',
-    //   meta: { title: 'Dynamic Table' }
-    // },
-    // {
-    //   path: 'drag-table',
-    //   component: () => import('@/views/table/drag-table'),
-    //   name: 'DragTable',
-    //   meta: { title: 'Drag Table' }
-    // },
-    // {
-    //   path: 'inline-edit-table',
-    //   component: () => import('@/views/table/inline-edit-table'),
-    //   name: 'InlineEditTable',
-    //   meta: { title: 'Inline Edit' }
-    // },
     {
       path: 'balcao',
       component: () => import('@/views/table/balcao'),
@@ -37,15 +19,15 @@ const tableRouter = {
       meta: { title: 'Balcão' }
     },
     {
-      path: 'complex-table',
-      component: () => import('@/views/table/complex-table'),
-      name: 'ComplexTable',
+      path: 'produtos',
+      component: () => import('@/views/table/produtos'),
+      name: 'Produtos',
       meta: { title: 'Produtos' }
     },
     {
       path: 'vendas',
       component: () => import('@/views/table/vendas'),
-      name: 'Vendas',
+      name: 'Vendas_',
       meta: { title: 'Vendas' }
     }
   ]
