@@ -3,24 +3,6 @@
     <div class="filter-container">
       <el-input v-model="listQuery.ean" placeholder="EAN" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
-      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Procurar
       </el-button>
@@ -43,8 +25,7 @@
       fit
       highlight-current-row
       style="width: 100%;"
-      @sort-change="sortChange"
-    >
+      @sort-change="sortChange">
       <!--el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
@@ -60,6 +41,12 @@
       <el-table-column label="Descricao" prop="descricao" sortable="custom" align="center" width="390">
         <template slot-scope="scope">
           <span>{{ scope.row.descricao | capitalize }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="Preço custo" prop="pco_custo" sortable="custom" align="center" width="90">
+        <template slot-scope="scope">
+          <span>{{ scope.row.pco_custo | money }}</span>
         </template>
       </el-table-column>
 
@@ -113,8 +100,10 @@
           <el-input v-model="temp.descricao" />
           <!--el-date-picker v-model="temp.descricao" type="datetime" placeholder="Please pick a date" /-->
         </el-form-item>
+        <el-form-item label="Preço custo" prop="preco_custo">
+          <money v-model="temp.pco_custo" v-bind="money" class="el-input__inner"></money>
+        </el-form-item>
         <el-form-item label="Preço" prop="preco">
-
           <money v-model="temp.pco_venda" v-bind="money" class="el-input__inner"></money>
         </el-form-item>
         <el-form-item label="Unidade" prop="unidade">
@@ -158,7 +147,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/produto'
+import { fetchList, fetchPv, create, update } from '@/api/produto'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -177,14 +166,13 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
   return acc
 }, {})
 
-
-
 export default {
-  name: 'ComplexTable',
+  name: 'Produtos',
   components: { Pagination, Money },
-  directives: { waves},
+  directives: { waves },
   filters: {
     money(value) {
+      value = parseFloat(value).toFixed(2)
       if (!value) return ''
       value = value.toString()
       if (value.indexOf('.')==-1){
@@ -237,6 +225,7 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
+        pco_custo: 0,
         importance: 1,
         remark: '',
         timestamp: new Date(),
@@ -341,6 +330,7 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
+      this.temp.pco_custo = this.temp.pco_custo||0
       this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
@@ -353,7 +343,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
+          update(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)

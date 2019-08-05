@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-editor-container">
-    <github-corner class="github-corner" />
+    <!-- <github-corner class="github-corner" /> -->
 
     <panel-group @handleSetLineChartData="handleSetLineChartData" />
 
@@ -53,7 +53,7 @@ import BoxCard from './components/BoxCard'
 
 const lineChartData = {
   newVisitis: {
-    expectedData: [100, 120, 161, 134, 105, 160, 165],
+    expectedData: [10, 120, 161, 134, 105, 160, 165],
     actualData: [120, 82, 91, 154, 162, 140, 145]
   },
   messages: {

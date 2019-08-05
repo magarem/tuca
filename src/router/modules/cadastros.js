@@ -23,6 +23,12 @@ const cadastrosRouter = {
       component: () => import('@/views/cadastros/fornecedores'),
       name: 'Fornecedores',
       meta: { title: 'Fornecedores' }
+    },
+    {
+      path: 'produtos',
+      component: () => import('@/views/cadastros/produtos'),
+      name: 'Produtos',
+      meta: { title: 'Produtos' }
     }
   ]
 }

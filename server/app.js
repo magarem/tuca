@@ -262,9 +262,10 @@ app.use(cors())
 
     console.log('req.body:', req.body);
 
-    db.run('INSERT INTO produtos (ean, descricao, pco_venda, unidade, estoque) VALUES (?,?,?,?,?)',
+    db.run('INSERT INTO produtos (ean, descricao, pco_custo, pco_venda, unidade, estoque) VALUES (?,?,?,?,?)',
             [req.body.ean,
              req.body.descricao,
+             req.body.pco_custo,
              req.body.pco_venda,
              req.body.unidade,
              req.body.estoque],
@@ -276,6 +277,28 @@ app.use(cors())
     );
     jsonStr = {code: 20000, data: 'success'}
     res.send(jsonStr);
+  })
+  app.patch('/dev-api/produto', function (req, res, next) {
+
+    var id = req.body.id
+    console.log('req.body:', req.body);
+
+    // Sql
+    let data = [req.body.ean, req.body.descricao, req.body.pco_custo, req.body.pco_venda, req.body.unidade, req.body.estoque, id];
+    let sql = "UPDATE produtos SET ean = ?, descricao = ?, pco_custo = ?, pco_venda = ?, unidade = ?, estoque = ? WHERE id = ?";
+
+    db.run(sql, data, function(err) {
+      if (err) {
+        return console.error(err.message);
+      }
+      console.log(`Row(s) updated: ${this.changes}`);
+    });
+
+
+    res.send({
+      code: 20000,
+      data: 'success'
+    })
   })
   app.delete('/dev-api/produto', function (req, res, next) {
     var id = req.body.id
@@ -444,7 +467,7 @@ app.use(cors())
     json_data = JSON.parse(req.body.json_data)
 
     let data = new Date()
-    db.run('INSERT INTO compras (compraID, cliente, subtotal, desconto, acrescimo, total, dinheiro, debito, credito, totalpago, troco, created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [json_data.compraID, json_data.cliente, json_data.subtotal, json_data.desconto, json_data.acrescimo, json_data.total, json_data.dinheiro, json_data.debito, json_data.credito, json_data.totalpago, json_data.troco, data], function(err) {
+    db.run('INSERT INTO compras (compraID, fornecedor, subtotal, desconto, acrescimo, total, dinheiro, debito, credito, totalpago, troco, created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [json_data.compraID, json_data.fornecedor, json_data.subtotal, json_data.desconto, json_data.acrescimo, json_data.total, json_data.dinheiro, json_data.debito, json_data.credito, json_data.totalpago, json_data.troco, data], function(err) {
       if (err) {
         return console.log(err.message);
       }

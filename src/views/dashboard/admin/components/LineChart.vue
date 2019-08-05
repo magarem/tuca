@@ -86,7 +86,7 @@ export default {
         },
         yAxis: {
           axisTick: {
-            show: false
+            show: true
           }
         },
         legend: {
@@ -125,7 +125,7 @@ export default {
             }
           },
           data: actualData,
-          animationDuration: 2800,
+          animationDuration: 3800,
           animationEasing: 'quadraticOut'
         }]
       })

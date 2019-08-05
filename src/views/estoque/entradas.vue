@@ -57,7 +57,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Preço" prop="pco_compra" sortable="custom" align="center" width="90">
+      <el-table-column label="Preço custo" prop="pco_custo" sortable="custom" align="center" width="90">
         <template slot-scope="scope">
           <span>{{ scope.row.pco_custo | money }}</span>
         </template>
@@ -97,7 +97,7 @@
       <el-col :span="4">
         <div class="grid-content bg-purple">
         <el-button  type="success" round v-show="totalGeral>0" v-waves :loading="downloadLoading" class="filter-item"  icon="el-icon-download" @click="compraClose()">
-          Pagar
+          Fechar compra
         </el-button>
         </div>
       </el-col>
@@ -195,7 +195,7 @@
         </el-table-column>
         <el-table-column label="Preço" prop="pco_compra" sortable="custom" align="center" width="130">
           <template slot-scope="scope">
-            <span>{{ scope.row.pco_compra | money}}</span>
+            <span>{{ scope.row.pco_custo | money}}</span>
           </template>
         </el-table-column>
 
@@ -272,7 +272,6 @@
         </span>
     </el-dialog>
 
-
     <el-dialog
       title="compra registrada"
       :visible.sync="compraCloseOkVisible"
@@ -285,7 +284,6 @@
       </span>
     </el-dialog>
 
-
   </div>
 </template>
 
@@ -297,21 +295,8 @@ import Pagination from '@/components/Pagination' // secondary package based on e
 import axios from 'axios';
 import {Money} from 'v-money'
 
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
-
-// arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
-
 export default {
-  name: 'ComplexTable',
+  name: 'Entradas',
   components: { Pagination, Money },
   directives: { waves},
   filters: {
@@ -386,7 +371,6 @@ export default {
         sort: '+id'
       },
       importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
@@ -427,7 +411,6 @@ export default {
   },
   created() {
     // this.getList()
-
   },
   methods: {
     indexMethod(index) {
@@ -543,8 +526,8 @@ export default {
           //this.compraItem++
           this.compraItemId++
           // Caso encontre o código de barra no banco
-          let subtotal = (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_compra))
-          this.list.unshift({id: this.compraItemId, ean: this.listQuery.ean, compraID: this.compraID, ean: response.data.items[0].ean, descricao: response.data.items[0].descricao, pco_compra: response.data.items[0].pco_compra, unidade: response.data.items[0].unidade, qnt: this.qnt, subtotal: subtotal})
+          let subtotal = (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_custo))
+          this.list.unshift({id: this.compraItemId, ean: this.listQuery.ean, compraID: this.compraID, ean: response.data.items[0].ean, descricao: response.data.items[0].descricao, pco_custo: response.data.items[0].pco_custo, unidade: response.data.items[0].unidade, qnt: this.qnt, subtotal: subtotal})
           this.total = response.data.total
 
           //itens sum
@@ -552,7 +535,7 @@ export default {
           for (let t=0; t<this.list.length; t++){
             this.totalItens += this.list[t].qnt
           }
-          this.totalGeral += (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_compra))
+          this.totalGeral += (parseFloat(this.qnt) * parseFloat(response.data.items[0].pco_custo))
           // Just to simulate the time of the request
           setTimeout(() => {
             this.listLoading = false
