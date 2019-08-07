@@ -6,7 +6,7 @@
             <el-input-number v-model="qnt"  :min="1" :max="100" style="width: 150px;"></el-input-number>
           </el-form-item>
           <el-form-item label="Código">
-            <input   class="el-input__inner" ref="ean" v-model="listQuery.ean" style="width: 150px; height: 33px;" @keyup.enter="addList(listQuery.ean)" autofocus>
+            <input class="el-input__inner" ref="ean" v-model="listQuery.ean" style="width: 150px; height: 33px;" @keyup.enter="addList(listQuery.ean)" autofocus>
             </input>
           </el-form-item>
           <el-form-item>
@@ -658,7 +658,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createArticle(this.temp).then(() => {
+          create(this.temp).then(() => {
             //this.list.unshift(this.temp)
             // Caso encontre o código de barra no banco
             this.vendaItemId++

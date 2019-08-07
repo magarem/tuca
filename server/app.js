@@ -238,7 +238,7 @@ app.use(cors())
       sqlLimit = " LIMIT " + (parseInt(req.query.page)-1) * 20 + ", " + req.query.limit
     }
     if (req.query.ean){
-      sqlWhere += "and ean like '"+req.query.ean+"'"
+      sqlWhere += "and ean like '%"+req.query.ean+"%'"
     }
     if (req.query.descricao){
       sqlWhere += "and descricao like '%"+req.query.descricao+"%'"
@@ -262,7 +262,7 @@ app.use(cors())
 
     console.log('req.body:', req.body);
 
-    db.run('INSERT INTO produtos (ean, descricao, pco_custo, pco_venda, unidade, estoque) VALUES (?,?,?,?,?)',
+    db.run('INSERT INTO produtos (ean, descricao, pco_custo, pco_venda, unidade, estoque) VALUES (?,?,?,?,?,?)',
             [req.body.ean,
              req.body.descricao,
              req.body.pco_custo,
@@ -350,15 +350,14 @@ app.use(cors())
     sqlStr = "SELECT * FROM vendas "+ sqlWhere + " order by id desc " + sqlLimit ;
     console.log('sqlStr', sqlStr);
     db.all(sqlStr, function(err, rows, fields) {
-    // console.log('rows.length:', rows.length);
-    jsonStr = {
-      "code": 20000,
-      "data": {
-          "total": rows.length}
-      }
-     jsonStr.data.items = rows
-     res.send(jsonStr);
-
+      // console.log('rows.length:', rows.length);
+      jsonStr = {
+        "code": 20000,
+        "data": {
+            "total": rows.length}
+        }
+       jsonStr.data.items = rows
+       res.send(jsonStr);
     });
 
   })
@@ -395,6 +394,15 @@ app.use(cors())
       console.log(`${this.lastID}`);
     });
 
+    // Lança no caixa
+    db.run('INSERT INTO caixa (data, descricao, tipo, valor) VALUES (?,?,?,?)', [data, 'Venda: ' + json_data.vendaID, '1', json_data.subtotal - json_data.desconto], function(err) {
+      if (err) {
+        return console.log(err.message);
+      }
+      // get the last insert id
+      console.log(`${this.lastID}`);
+    });
+
     //Insert itens
     for (var i = 0; i < json_data.itens.length; i++) {
       db.run('INSERT INTO vendas_itens (vendaID, vendaItem, ean, descricao, pco_venda, unidade, qnt, subtotal) VALUES (?,?,?,?,?,?,?,?)', [json_data.itens[i].vendaID, json_data.itens[i].vendaItem, json_data.itens[i].ean, json_data.itens[i].descricao, json_data.itens[i].pco_venda, json_data.itens[i].unidade, json_data.itens[i].qnt, json_data.itens[i].subtotal], function(err) {
@@ -404,6 +412,11 @@ app.use(cors())
           // get the last insert id
           console.log(`insert venda table success`);
       });
+
+      // Dá baixa dos itens no estoque
+      let sql = "UPDATE produtos SET estoque = estoque - " + parseInt(json_data.itens[i].qnt) + " WHERE ean like '%" + json_data.itens[i].ean + "%'";
+      console.log(sql);
+      db.run(sql);
      }
 
     res.send(req.body.json_data);
@@ -466,7 +479,11 @@ app.use(cors())
 
     json_data = JSON.parse(req.body.json_data)
 
-    let data = new Date()
+    console.log('json_data:', json_data);
+    console.log('json_data.itens.length:', json_data.itens.length);
+    console.log('json_data.itens[0].qnt:', json_data.itens[0].qnt);
+
+    let data = new Date().getTime()
     db.run('INSERT INTO compras (compraID, fornecedor, subtotal, desconto, acrescimo, total, dinheiro, debito, credito, totalpago, troco, created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [json_data.compraID, json_data.fornecedor, json_data.subtotal, json_data.desconto, json_data.acrescimo, json_data.total, json_data.dinheiro, json_data.debito, json_data.credito, json_data.totalpago, json_data.troco, data], function(err) {
       if (err) {
         return console.log(err.message);
@@ -475,19 +492,97 @@ app.use(cors())
       console.log(`${this.lastID}`);
     });
 
+
+    let total = 0
     //Insert itens
     for (var i = 0; i < json_data.itens.length; i++) {
-      db.run('INSERT INTO compras_itens (compraID, compraItem, ean, descricao, pco_compra, unidade, qnt, subtotal) VALUES (?,?,?,?,?,?,?,?)', [json_data.itens[i].compraID, json_data.itens[i].compraItem, json_data.itens[i].ean, json_data.itens[i].descricao, json_data.itens[i].pco_compra, json_data.itens[i].unidade, json_data.itens[i].qnt, json_data.itens[i].subtotal], function(err) {
+      total += json_data.itens[i].subtotal
+      db.run('INSERT INTO compras_itens (compraID, compraItem, ean, descricao, pco_custo, unidade, qnt, subtotal) VALUES (?,?,?,?,?,?,?,?)', [json_data.itens[i].compraID, json_data.itens[i].compraItem, json_data.itens[i].ean, json_data.itens[i].descricao, json_data.itens[i].pco_custo, json_data.itens[i].unidade, json_data.itens[i].qnt, json_data.itens[i].subtotal], function(err) {
           if (err) {
             return console.log(err.message);
           }
+
           // get the last insert id
           console.log(`insert compra table success`);
       });
+      // Dá baixa dos itens no estoque
+      let sql = "UPDATE produtos SET estoque = estoque + " + parseInt(json_data.itens[i].qnt) + " WHERE ean like '%" + json_data.itens[i].ean + "%'";
+      console.log(sql);
+      db.run(sql);
      }
+
+     // Lança no caixa
+     console.log("--data--", data);
+
+     db.run('INSERT INTO caixa (data, historico, entrada, saida) VALUES (?,?,?,?)', [data, 'Compra: ' + json_data.fornecedor + ' - ' + json_data.compraID, 0, total], function(err) {
+       if (err) {
+         return console.log(err.message);
+       }
+       // get the last insert id
+       console.log(`${this.lastID}`);
+     });
 
     res.send(req.body.json_data);
   });
+
+////////////////////////////////
+// Financeiro
+////////////////////////////////
+
+  // Caixa
+  app.get('/dev-api/caixa', function (req, res, next) {
+    console.log('req.query:', req.query);
+    sqlStr = "SELECT * FROM caixa ORDER BY id desc";
+    console.log('sqlStr', sqlStr);
+    db.all(sqlStr, function(err, rows, fields) {
+      jsonStr = {"code": 20000, "data": {"total": (rows||[]).length}}
+      jsonStr.data.items = rows
+      res.send(jsonStr);
+    });
+  })
+  app.post('/dev-api/caixa', function (req, res, next) {
+    console.log('req.body:', req.body);
+    db.run('INSERT INTO caixa (data, historico, entrada, saida, saldo) VALUES (?,?,?,?,?)',
+      [req.body.data,
+       req.body.historico,
+       req.body.entrada,
+       req.body.saida,
+       req.body.saldo],
+       function(err) {
+          if (err) return console.log(err.message);
+          // get the last insert id
+          console.log(`A row has been inserted with rowid ${this.lastID}`);
+     })
+     jsonStr = {code: 20000, data: 'success'}
+     res.send(jsonStr);
+  })
+  app.patch('/dev-api/caixa', function (req, res, next) {
+    var id = req.body.id
+
+    console.log('req.body:', req.body);
+    //
+    let data = [req.body.data, req.body.historico, req.body.entrada, req.body.saida, req.body.saldo, id];
+    console.log('data:', data);
+    let sql = "UPDATE caixa SET data = ?, historico = ?, entrada = ?, saida = ?, saldo = ? WHERE id = ?";
+    console.log('sql:', sql);
+    db.run(sql, data, function(err) {
+      if (err) {
+        return console.error(err.message);
+      }
+      console.log(`Row(s) updated: ${this.changes}`);
+    });
+
+    res.send({
+      code: 20000,
+      data: 'success'
+    })
+  })
+  app.delete('/dev-api/caixa', function (req, res, next) {
+    console.log('req.body.id:', req.body.id);
+    console.log('req.params.id:', req.params.id);
+    db.run('DELETE FROM caixa WHERE id = ' + req.body.id);
+    res.send({code: 20000});
+  })
 
 
 app.listen(3000, function () {

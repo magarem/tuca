@@ -107,37 +107,6 @@
     <!----          Windows                                       ----->
     <!----                                                        ----->
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible"  top="5vh">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-
-        <el-form-item label="Código" prop="ean">
-          <el-input v-model="temp.ean" />
-        </el-form-item>
-
-        <el-form-item label="Descrição" prop="descricao">
-          <el-input v-model="temp.descricao" />
-        </el-form-item>
-
-        <el-form-item label="Preço" prop="preco">
-          <money v-model="temp.pco_compra" v-bind="money" class="el-input__inner"></money>
-        </el-form-item>
-        <el-form-item label="Unidade" prop="unidade">
-          <el-input v-model="temp.unidade" />
-        </el-form-item>
-        <el-form-item label="Estoque" prop="estoque">
-          <el-input v-model="temp.estoque" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">
-          Cancela
-        </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          Confirma
-        </el-button>
-      </div>
-    </el-dialog>
-
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormQntVisible"  top="5vh">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="140px" style="width: 400px; margin-left:50px;">
 
@@ -150,14 +119,14 @@
         <el-form-item label="Descrição" prop="descricao">
           {{temp2.descricao}}
         </el-form-item>
-        <el-form-item label="Preço" prop="preco">
-          {{temp2.pco_compra | money}}
+        <el-form-item label="Preço custo" prop="preco_custo">
+          {{temp2.pco_custo | money}}
         </el-form-item>
         <el-form-item label="Unidade" prop="unidade">
           {{temp2.unidade}}
         </el-form-item>
         <el-form-item label="Quantidade" prop="qnt">
-          <el-input-number v-model="temp2.qnt" @change="temp2.subtotal = temp2.qnt * temp2.pco_compra" :min="1" :max="10"></el-input-number>
+          <el-input-number v-model="temp2.qnt" @change="temp2.subtotal = temp2.qnt * temp2.pco_custo" :min="1" :max="1000"></el-input-number>
         </el-form-item>
         <el-form-item label="subtotal" prop="total">
           {{temp2.subtotal | money}}
@@ -193,7 +162,7 @@
             <span>{{ scope.row.unidade }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Preço" prop="pco_compra" sortable="custom" align="center" width="130">
+        <el-table-column label="Preço custo" prop="pco_custo" sortable="custom" align="center" width="130">
           <template slot-scope="scope">
             <span>{{ scope.row.pco_custo | money}}</span>
           </template>
@@ -206,10 +175,7 @@
             </el-button>
           </template>
         </el-table-column>
-
       </el-table>
-
-
 
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="produtosListFlg = false">Fechar</el-button>
