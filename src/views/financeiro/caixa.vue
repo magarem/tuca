@@ -184,7 +184,7 @@ export default {
         id: undefined,
         importance: 1,
         remark: '',
-        timestamp: new Date(),
+        data: new Date(),
         title: '',
         type: '',
         status: 'published'
@@ -260,6 +260,7 @@ export default {
     },
     handleCreate() {
       this.resetTemp()
+      this.temp.data = moment(new Date()).format('DD/MM/YYYY')
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -269,6 +270,9 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
+          this.temp.data = this.temp.data.split("/")[1]+"/"+this.temp.data.split("/")[0]+"/"+this.temp.data.split("/")[2]
+console.log(this.temp.data);
+          this.temp.data = new Date(this.temp.data).getTime()
           create(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
@@ -297,7 +301,7 @@ export default {
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
       this.temp.saldo = 0
-      this.temp.data = moment(new Date(parseFloat(String(this.temp.data)))).format('MM/DD/YYYY')
+      this.temp.data = moment(new Date(parseFloat(String(this.temp.data)))).format('DD/MM/YYYY')
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

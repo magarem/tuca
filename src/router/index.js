@@ -9,9 +9,11 @@ import Layout from '@/layout'
 /* Router Modules */
 // import componentsRouter from './modules/components'
 // import chartsRouter from './modules/charts'
-import vendasRouter from './modules/vendas'
+
 import cadastrosRouter from './modules/cadastros'
+import comprasRouter from './modules/compras'
 import estoqueRouter from './modules/estoque'
+import vendasRouter from './modules/vendas'
 import financeiroRouter from './modules/financeiro'
 
 /**
@@ -80,8 +82,8 @@ export const constantRoutes = [
       {
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
-        meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
+        name: 'Painel',
+        meta: { title: 'Painel', icon: 'dashboard', affix: true }
       }
     ]
   },
@@ -112,9 +114,9 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/permission/page',
     alwaysShow: true, // will always show the root menu
-    name: 'Permission',
+    name: 'Autorizações',
     meta: {
-      title: 'Permission',
+      title: 'Autorizações',
       icon: 'lock',
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
@@ -154,6 +156,7 @@ export const asyncRoutes = [
   // chartsRouter,
   // nestedRouter,
   cadastrosRouter,
+  comprasRouter,
   estoqueRouter,
   vendasRouter,
   financeiroRouter,

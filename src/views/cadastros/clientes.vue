@@ -1,40 +1,18 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.ean" placeholder="EAN" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
-      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
+      <el-input v-model="listQuery.nome" placeholder="Nome" style="width: 300px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.doc" placeholder="Doc" style="width: 250px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Procurar
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         Incluir
       </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
+      <!--el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
         Exportar
-      </el-button>
-      <!-- <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        reviewer
-      </el-checkbox> -->
+      </el-button-->
     </div>
-
     <el-table
       :key="tableKey"
       v-loading="listLoading"
@@ -44,11 +22,12 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
-      <!--el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
+
+      <el-table-column label="Código" prop="id" sortable="custom" align="center" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
-      </el-table-column-->
+      </el-table-column>
 
       <el-table-column label="Nome" prop="nome" sortable="custom" align="center" width="400">
         <template slot-scope="scope">
@@ -109,12 +88,6 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
           </el-button>
-          <!--el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
-            Publish
-          </el-button>
-          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
-            Draft
-          </el-button-->
           <el-button  size="mini" type="danger" @click="handleDelete(row)">
             Delete
           </el-button>
@@ -122,48 +95,76 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" layout="prev, pager, next"/>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="80px" style="width: 400px; margin-left:50px;">
+    <!--
 
-        <el-form-item label="Nome" prop="nome">
-          <el-input v-model="temp.nome" />
-        </el-form-item>
+        Janelas
 
-        <el-form-item label="Tipo" prop="tipo">
-          <el-input v-model="temp.tipo" />
-        </el-form-item>
+    -->
+    <el-dialog :title="textMap[dialogStatus]" title='Cadastrar' align='center' :visible.sync="dialogFormVisible" top="5vh" width=70%>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="80px" style="_width: 400px; margin:0 50px 0 50px;">
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="Nome" prop="nome">
+              <el-input v-model="temp.nome"  autofocus/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
 
-        <el-form-item label="Doc" prop="doc">
-          <el-input v-model="temp.doc" />
-        </el-form-item>
+            <el-form-item label="Tipo" prop="tipo">
+              <el-select v-model="temp.tipo" placeholder="Select" style='width:290px'>
+                 <el-option label="Física" value="fisica">
+                 </el-option>
+                 <el-option label="Jurídica" value="juridica">
+                 </el-option>
+                 <el-option label="Estrangeira" value="estrangeira">
+                 </el-option>
+               </el-select>
+            </el-form-item>
 
-        <el-form-item label="Contato" prop="contato">
-          <el-input v-model="temp.contato" />
-        </el-form-item>
-
-        <el-form-item label="Fone" prop="fone">
-          <el-input v-model="temp.fone" />
-        </el-form-item>
-
-        <el-form-item label="Fone2" prop="fone2">
-          <el-input v-model="temp.fone2" />
-        </el-form-item>
-
-        <el-form-item label="Email" prop="email">
-          <el-input v-model="temp.email" />
-        </el-form-item>
-
-        <el-form-item label="Endereço" prop="endereco">
-          <el-input v-model="temp.endereco" />
-        </el-form-item>
-
-        <el-form-item label="Obs" prop="obs">
-          <el-input v-model="temp.obs" />
-        </el-form-item>
+            <el-form-item label="Contato" prop="contato">
+              <el-input v-model="temp.contato" />
+            </el-form-item>
+            <el-form-item label="Fone" prop="fone">
+              <el-input v-model="temp.fone" />
+            </el-form-item>
+            <el-form-item label="Endereço" prop="endereco">
+              <el-input v-model="temp.endereco" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Doc" prop="doc">
+              <el-input v-model="temp.doc" />
+            </el-form-item>
+            <el-form-item label="Email" prop="email">
+              <el-input v-model="temp.email" />
+            </el-form-item>
+            <el-form-item label="Fone2" prop="fone2">
+              <el-input v-model="temp.fone2" />
+            </el-form-item>
+            <el-form-item label="CEP" prop="cep">
+              <el-input v-model="temp.cep" />
+            </el-form-item>
+          </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="24">
+              <el-form-item label="Obs" prop="obs">
+                 <el-input
+                  type="textarea"
+                  :rows="3"
+                  placeholder=""
+                  v-model="temp.obs">
+                </el-input>
+             </el-form-item>
+            </el-col>
+        </el-row>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+
+      <div slot="footer" class="dialog-footer"  align='center'>
         <el-button @click="dialogFormVisible = false">
           Cancela
         </el-button>
@@ -173,15 +174,6 @@
       </div>
     </el-dialog>
 
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
@@ -191,9 +183,6 @@ import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import {Money} from 'v-money'
-
-
-
 
 export default {
   name: 'Clientes',
@@ -240,7 +229,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
+        limit: 10,
         importance: undefined,
         title: undefined,
         type: undefined,
@@ -252,12 +241,6 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -265,8 +248,6 @@ export default {
         update: 'Edit',
         create: 'Create'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         type: [{ required: true, message: 'type is required', trigger: 'change' }],
         timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
@@ -281,10 +262,13 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
+      console.log('this.listQuery:', this.listQuery);
+      let self = this
       fetchList(this.listQuery).then(response => {
-        console.log('response.data.items:', response.data.items)
+        console.log('response.data-->:', response.data)
         this.list = response.data.items
         this.total = response.data.total
+
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -339,14 +323,16 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          create(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
+          create(this.temp).then((ret) => {
+            // this.temp.id = response.data
+            console.log('response.data:', ret.data.id);
+            this.temp.id = ret.data.id
+            //this.list.push(this.temp)
             this.dialogFormVisible = false
             this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
+              title: 'Sucesso',
+              message: 'Cliente cadastrado',
               type: 'success',
               duration: 2000
             })
@@ -414,12 +400,6 @@ export default {
         console.log('--->', row.id);
       })
 
-    },
-    handleFetchPv(pv) {
-      fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
-      })
     },
     handleDownload() {
       this.downloadLoading = true

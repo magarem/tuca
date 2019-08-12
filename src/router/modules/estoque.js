@@ -13,18 +13,6 @@ const estoqueRouter = {
   },
   children: [
     {
-      path: 'compras',
-      component: () => import('@/views/estoque/compras'),
-      name: 'Compras',
-      meta: { title: 'Compras' }
-    },
-    {
-      path: 'entrada',
-      component: () => import('@/views/estoque/entradas'),
-      name: 'Entradas',
-      meta: { title: 'Entradas' }
-    },
-    {
       path: 'movimentacoes',
       component: () => import('@/views/estoque/movimentacoes'),
       name: 'Movimentações',

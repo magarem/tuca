@@ -1,26 +1,10 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.ean" placeholder="EAN" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
+      <el-input v-model="listQuery.nome" placeholder="Razão social /  Nome fantasia" style="width: 300px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
-      <!-- <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
       </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Procurar
       </el-button>
@@ -50,9 +34,15 @@
         </template>
       </el-table-column-->
 
-      <el-table-column label="Nome" prop="nome" sortable="custom" align="center" width="400">
+      <el-table-column label="Razão social" prop="razao_social" sortable="custom" align="center" width="400">
         <template slot-scope="scope">
-          <span>{{ scope.row.nome  | capitalize }}</span>
+          <span>{{ scope.row.razao_social  | capitalize }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="Nome fantasia" prop="nome_fantasia" sortable="custom" align="center" width="400">
+        <template slot-scope="scope">
+          <span>{{ scope.row.nome_fantasia  | capitalize }}</span>
         </template>
       </el-table-column>
 
@@ -97,6 +87,11 @@
           <span>{{ scope.row.endereco }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="CEP" prop="cep" sortable="custom" align="center" width="100">
+        <template slot-scope="scope">
+          <span>{{ scope.row.cep }}</span>
+        </template>
+      </el-table-column>
 
       <el-table-column label="Obs" prop="obs" sortable="custom" align="center" width="100">
         <template slot-scope="scope">
@@ -109,12 +104,6 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
           </el-button>
-          <!--el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
-            Publish
-          </el-button>
-          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
-            Draft
-          </el-button-->
           <el-button  size="mini" type="danger" @click="handleDelete(row)">
             Delete
           </el-button>
@@ -125,10 +114,14 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="80px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="130px" style="width: 400px; margin-left:50px;">
 
-        <el-form-item label="Nome" prop="nome">
-          <el-input v-model="temp.nome" />
+        <el-form-item label="Razão social" prop="razao_social">
+          <el-input v-model="temp.razao_social" />
+        </el-form-item>
+
+        <el-form-item label="Nome fantasia" prop="nome_fantasia">
+          <el-input v-model="temp.nome_fantasia" />
         </el-form-item>
 
         <el-form-item label="Tipo" prop="tipo">
@@ -157,6 +150,10 @@
 
         <el-form-item label="Endereço" prop="endereco">
           <el-input v-model="temp.endereco" />
+        </el-form-item>
+
+        <el-form-item label="CEP" prop="cep">
+          <el-input v-model="temp.cep" />
         </el-form-item>
 
         <el-form-item label="Obs" prop="obs">
@@ -192,13 +189,10 @@ import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import {Money} from 'v-money'
 
-
-
-
 export default {
-  name: 'fronecedores',
+  name: 'Fornecedores',
   components: { Pagination, Money },
-  directives: { waves},
+  directives: { waves },
   filters: {
     money(value) {
       if (!value) return ''
@@ -340,13 +334,12 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
           create(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
+              title: 'Sucesso',
+              message: 'Criado com sucesso',
               type: 'success',
               duration: 2000
             })
@@ -359,8 +352,8 @@ export default {
         this.list.unshift(this.temp)
         this.dialogFormVisible = false
         this.$notify({
-          title: 'Success',
-          message: 'Created Successfully',
+          title: 'Sucesso',
+          message: 'Criado com sucesso',
           type: 'success',
           duration: 2000
         })

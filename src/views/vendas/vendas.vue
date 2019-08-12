@@ -1,15 +1,18 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.ean" placeholder="EAN" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.descricao" placeholder="Descrição" style="width: 300px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.codigo" placeholder="Código" style="width: 250px;" class="filter-item" @keyup.enter.native="handleFilter" />
 
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Procurar
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        Incluir
-      </el-button>
+      <router-link to="/vendas/balcao">
+
+        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" >
+          Incluir
+        </el-button>
+
+    </router-link>
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
         Exportar
       </el-button>
@@ -141,7 +144,8 @@
     <el-dialog :visible.sync="dialogPvVisible" title="Venda" width="80%" top="5vh" center>
        <el-row :gutter="20">
           <el-col :span="4"><div class="grid-content bg-purple"><b>Venda #:</b> {{vendaNumero}}</div></el-col>
-          <el-col :span="8"><div class="grid-content bg-purple"><b>Código:</b> {{vendaID}}</div></el-col>
+          <el-col :span="4"><div class="grid-content bg-purple"><b>Código:</b> {{vendaID}}</div></el-col>
+          <el-col :span="4"><div class="grid-content bg-purple"><b>Cliente:</b> {{clienteID}} - {{clienteNome}}</div></el-col>
           <el-col :span="6"><div class="grid-content bg-purple"><b>Data:</b> {{vendaData}}</div></el-col>
           <el-col :span="6"><div class="grid-content bg-purple"><b>Valor:</b> {{vendaTotal|money}}</div></el-col>
        </el-row>
@@ -233,7 +237,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 
 
 export default {
-  name: 'ComplexTable',
+  name: 'Vendas',
   components: { Pagination, Money },
   directives: { waves},
   filters: {
@@ -407,7 +411,6 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
           createArticle(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
