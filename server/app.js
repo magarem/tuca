@@ -68,26 +68,42 @@ app.use(cors())
   app.get('/dev-api/clientes', function (req, res, next) {
 
     console.log('req.query:', req.query);
-    sqlStr = "SELECT * FROM clientes ";
-    console.log('sqlStr', sqlStr);
-    db.all(sqlStr, function(err, rows, fields) {
-    // console.log('rows.length:', rows.length);
-    jsonStr = {
-      "code": 20000,
-      "data": {
-          "total": (rows||[]).length}
-      }
-     jsonStr.data.items = rows
-     res.send(jsonStr);
+    let strWhere = " where 1=1 "
+    let strLimit = " limit " + ((parseInt(req.query.page) - 1) * req.query.limit) + ',' + req.query.limit
+    let strSort = " order by " + req.query.sort.replace('+','').replace('-','')
 
-    });
+    if (req.query.nome){ strWhere += " and nome like '%"+req.query.nome+"%'"}
+    if (req.query.doc){ strWhere += " and doc like '%"+req.query.doc+"%'"}
+
+    sqlStr = "SELECT count(*) as total FROM clientes " + strWhere
+    db.all(sqlStr, function(err, rows, fields) {
+       let totGeral = rows[0].total
+       console.log('totGeral:', totGeral);
+       sqlStr = "SELECT * FROM clientes " + strWhere + strSort + strLimit;
+       console.log('sqlStr', sqlStr);
+       db.all(sqlStr, function(err, rows, fields) {
+       // console.log('rows.length:', rows.length);
+         jsonStr = {
+           "code": 20000,
+           "data": {
+               // "total": (rows||[]).length}
+               "total": totGeral}
+           }
+          jsonStr.data.items = rows
+          res.send(jsonStr);
+       });
+
+
+
+    })
+
 
   })
   app.post('/dev-api/cliente', function (req, res, next) {
 
     console.log('req.body:', req.body);
 
-    db.run('INSERT INTO clientes (nome, tipo, doc, contato, fone, fone2, email, endereco, obs) VALUES (?,?,?,?,?,?,?,?,?)',
+    db.run('INSERT INTO clientes (nome, tipo, doc, contato, fone, fone2, email, endereco, cep, obs) VALUES (?,?,?,?,?,?,?,?,?,?)',
             [req.body.nome,
              req.body.tipo,
              req.body.doc,
@@ -96,24 +112,25 @@ app.use(cors())
              req.body.fone2,
              req.body.email,
              req.body.endereco,
+             req.body.cep,
              req.body.obs],
              function(err) {
                 if (err) return console.log(err.message);
                 // get the last insert id
                 console.log(`A row has been inserted with rowid ${this.lastID}`);
+                jsonStr = {code: 20000, data: {id: this.lastID}}
+                res.send(jsonStr);
              }
     );
-    jsonStr = {code: 20000, data: 'success'}
-    res.send(jsonStr);
+
+
   })
   app.patch('/dev-api/cliente', function (req, res, next) {
     var id = req.body.id
 
     console.log('req.body:', req.body);
-    //
-    let data = [req.body.nome, req.body.tipo, req.body.doc, req.body.contato, req.body.fone, req.body.fone2, req.body.email, req.body.endereco, req.body.obs, id];
-    let sql = "UPDATE clientes SET nome = ?, tipo = ?, doc = ?, contato = ?, fone = ?, fone2 = ?, email = ?, endereco = ?, obs = ? WHERE id = ?";
-
+    let data = [req.body.nome, req.body.tipo, req.body.doc, req.body.contato, req.body.fone, req.body.fone2, req.body.email, req.body.endereco, req.body.cep, req.body.obs, id];
+    let sql = "UPDATE clientes SET nome = ?, tipo = ?, doc = ?, contato = ?, fone = ?, fone2 = ?, email = ?, endereco = ?, cep = ?, obs = ? WHERE id = ?";
 
     db.run(sql, data, function(err) {
       if (err) {
@@ -121,7 +138,6 @@ app.use(cors())
       }
       console.log(`Row(s) updated: ${this.changes}`);
     });
-
 
     res.send({
       code: 20000,
@@ -169,8 +185,9 @@ app.use(cors())
 
     console.log('req.body:', req.body);
 
-    db.run('INSERT INTO fornecedores (nome, tipo, doc, contato, fone, fone2, email, endereco, obs) VALUES (?,?,?,?,?,?,?,?,?)',
-            [req.body.nome,
+    db.run('INSERT INTO fornecedores (razao_social, nome_fantasia, tipo, doc, contato, fone, fone2, email, endereco, cep, obs) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+            [req.body.razao_social,
+             req.body.nome_fantasia,
              req.body.tipo,
              req.body.doc,
              req.body.contato,
@@ -178,6 +195,7 @@ app.use(cors())
              req.body.fone2,
              req.body.email,
              req.body.endereco,
+             req.body.cep,
              req.body.obs],
              function(err) {
                 if (err) return console.log(err.message);
@@ -193,9 +211,8 @@ app.use(cors())
 
     console.log('req.body:', req.body);
     //
-    let data = [req.body.nome, req.body.tipo, req.body.doc, req.body.contato, req.body.fone, req.body.fone2, req.body.email, req.body.endereco, req.body.obs, id];
-    let sql = "UPDATE fornecedores SET nome = ?, tipo = ?, doc = ?, contato = ?, fone = ?, fone2 = ?, email = ?, endereco = ?, obs = ? WHERE id = ?";
-
+    let data = [req.body.razao_social, req.body.nome_fantasia, req.body.tipo, req.body.doc, req.body.contato, req.body.fone, req.body.fone2, req.body.email, req.body.endereco, req.body.cep, req.body.obs, id];
+    let sql = "UPDATE fornecedores SET razao_social = ?, nome_fantasia = ?, tipo = ?, doc = ?, contato = ?, fone = ?, fone2 = ?, email = ?, endereco = ?, cep = ?, obs = ? WHERE id = ?";
 
     db.run(sql, data, function(err) {
       if (err) {
@@ -327,6 +344,8 @@ app.use(cors())
            });
   })
 
+//////////////////////////////
+
 
 //////////////////////////////
 // Vendas
@@ -402,7 +421,7 @@ app.use(cors())
       // get the last insert id
       console.log(`${this.lastID}`);
     });
-
+    let total = 0
     //Insert itens
     for (var i = 0; i < json_data.itens.length; i++) {
       db.run('INSERT INTO vendas_itens (vendaID, vendaItem, ean, descricao, pco_venda, unidade, qnt, subtotal) VALUES (?,?,?,?,?,?,?,?)', [json_data.itens[i].vendaID, json_data.itens[i].vendaItem, json_data.itens[i].ean, json_data.itens[i].descricao, json_data.itens[i].pco_venda, json_data.itens[i].unidade, json_data.itens[i].qnt, json_data.itens[i].subtotal], function(err) {
@@ -412,15 +431,29 @@ app.use(cors())
           // get the last insert id
           console.log(`insert venda table success`);
       });
-
+      total += json_data.itens[i].subtotal
       // Dá baixa dos itens no estoque
       let sql = "UPDATE produtos SET estoque = estoque - " + parseInt(json_data.itens[i].qnt) + " WHERE ean like '%" + json_data.itens[i].ean + "%'";
       console.log(sql);
       db.run(sql);
      }
 
+     // Lança no caixa
+     console.log("--data--", data);
+
+     db.run('INSERT INTO caixa (data, historico, entrada, saida) VALUES (?,?,?,?)', [data, 'Venda: ' + json_data.fornecedor + ' - ' + json_data.compraID, total, 0], function(err) {
+       if (err) {
+         return console.log(err.message);
+       }
+       // get the last insert id
+       console.log(`${this.lastID}`);
+     });
+
     res.send(req.body.json_data);
   });
+
+///////////////////////////////
+
 
 //////////////////////////////
 // Compras
@@ -524,6 +557,9 @@ app.use(cors())
 
     res.send(req.body.json_data);
   });
+
+//////////////////////////////
+
 
 ////////////////////////////////
 // Financeiro
