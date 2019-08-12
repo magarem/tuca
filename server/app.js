@@ -59,6 +59,10 @@ app.set('view engine', 'ejs');
 app.use(express.static('./public'));
 app.use(cors())
 
+// Clientes
+app.get('/init', function (req, res, next) {
+ res.render('index', {user: 0});
+})
 
 ////////////////////////////////
 // Cadastros
@@ -232,6 +236,100 @@ app.use(cors())
     console.log('req.body.id:', req.body.id);
     console.log('req.params.id:', req.params.id);
     db.run('DELETE FROM fornecedores WHERE id = ' + req.body.id);
+
+     res.send({code: 20000,
+             data: {
+               pvData: [
+                 { key: 'PC', pv: 1024 },
+                 { key: 'mobile', pv: 1024 },
+                 { key: 'ios', pv: 1024 },
+                 { key: 'android', pv: 1024 }
+               ]
+             }
+           });
+  })
+
+  // Funcionarios
+  app.get('/dev-api/funcionarios', function (req, res, next) {
+
+    console.log('req.query:', req.query);
+    let strWhere = " where 1=1 "
+    let strLimit = " limit " + ((parseInt(req.query.page) - 1) * req.query.limit) + ',' + req.query.limit
+    let strSort = " order by " + req.query.sort.replace('+','').replace('-','')
+
+    if (req.query.nome){ strWhere += " and nome like '%"+req.query.nome+"%'"}
+    if (req.query.doc){ strWhere += " and doc like '%"+req.query.doc+"%'"}
+
+    sqlStr = "SELECT count(*) as total FROM funcionarios " + strWhere
+    db.all(sqlStr, function(err, rows, fields) {
+      if (rows){
+       let totGeral = rows[0].total
+       console.log('totGeral:', totGeral);
+       sqlStr = "SELECT * FROM funcionarios " + strWhere + strSort + strLimit;
+       console.log('sqlStr', sqlStr);
+       db.all(sqlStr, function(err, rows, fields) {
+         jsonStr = {
+           "code": 20000,
+           "data": {
+               // "total": (rows||[]).length}
+               "total": totGeral}
+           }
+          jsonStr.data.items = rows
+          res.send(jsonStr);
+       });
+      }
+    })
+  })
+  app.post('/dev-api/funcionario', function (req, res, next) {
+
+    console.log('req.body:', req.body);
+
+    db.run('INSERT INTO funcionarios (nome, funcao, doc, contato, fone, fone2, email, endereco, cep, obs) VALUES (?,?,?,?,?,?,?,?,?,?)',
+            [req.body.nome,
+             req.body.funcao,
+             req.body.doc,
+             req.body.contato,
+             req.body.fone,
+             req.body.fone2,
+             req.body.email,
+             req.body.endereco,
+             req.body.cep,
+             req.body.obs],
+             function(err) {
+                if (err) return console.log(err.message);
+                // get the last insert id
+                console.log(`A row has been inserted with rowid ${this.lastID}`);
+                jsonStr = {code: 20000, data: {id: this.lastID}}
+                res.send(jsonStr);
+             }
+    );
+
+
+  })
+  app.patch('/dev-api/funcionario', function (req, res, next) {
+    var id = req.body.id
+
+    console.log('req.body:', req.body);
+    let data = [req.body.nome, req.body.funcao, req.body.doc, req.body.contato, req.body.fone, req.body.fone2, req.body.email, req.body.endereco, req.body.cep, req.body.obs, id];
+    let sql = "UPDATE funcionarios SET nome = ?, funcao = ?, doc = ?, contato = ?, fone = ?, fone2 = ?, email = ?, endereco = ?, cep = ?, obs = ? WHERE id = ?";
+
+    db.run(sql, data, function(err) {
+      if (err) {
+        return console.error(err.message);
+      }
+      console.log(`Row(s) updated: ${this.changes}`);
+    });
+
+    res.send({
+      code: 20000,
+      data: 'success'
+    })
+  })
+  app.delete('/dev-api/funcionario', function (req, res, next) {
+
+    console.log('req.body.id:', req.body.id);
+    console.log('req.params.id:', req.params.id);
+    db.run('DELETE FROM funcionarios WHERE id = ' + req.body.id);
 
      res.send({code: 20000,
              data: {

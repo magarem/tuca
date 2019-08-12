@@ -25,6 +25,12 @@ const cadastrosRouter = {
       meta: { title: 'Fornecedores' }
     },
     {
+      path: 'funcionarios',
+      component: () => import('@/views/cadastros/funcionarios'),
+      name: 'Funcionarios',
+      meta: { title: 'Funcionários' }
+    },
+    {
       path: 'produtos',
       component: () => import('@/views/cadastros/produtos'),
       name: 'Produtos',
