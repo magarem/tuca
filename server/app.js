@@ -719,6 +719,11 @@ app.get('/init', function (req, res, next) {
   })
 
 
-app.listen(8080, function () {
-  console.log('Example app listening on port 3000!');
-});
+  var port = process.env.PORT || 8080;
+  const handleError = (err, res) => {
+    res
+      .status(500)
+      .contentType("text/plain")
+      .end("Oops! Something went wrong!");
+  };
+  app.listen(port, () => console.log('Server start on port ${port}'));
